@@ -7,7 +7,7 @@ Planned capacity: approximately 18–22 focused founder hours/week; adjust after
 | F00 / done locally | 9 Sep | Import starter, capability manifest, interface, documentation | local regression tests; recorded validation limits |
 | B00 / P0 | 9–15 Sep | Validate workflow, competitor walkthrough, category/ownership | five staff + ten citizen interviews; unambiguous applicant route |
 | B01 / P0 | 16–22 Sep | PostgreSQL migration and named staff identity design | migration/recovery/tenant-denial tests; no real evidence yet |
-| B02 / P0 | 16–29 Sep | Licensed lookup with explicit external-processing decision | provenance, timeouts, capped spend, unknown-on-failure tests |
+| B02 / P0 | 16–29 Sep | Licensed lookup with explicit external-processing decision — design recorded in `PROVIDER_ADAPTERS.md`, nothing contracted | provenance, timeouts, capped spend, unknown-on-failure tests |
 | B03 / P1 | 23–29 Sep | User-confirmed screenshot extraction and Khmer review | extraction errors editable; model has no tools; measured field accuracy |
 | B04 / P0 | 30 Sep–6 Oct | Consent, retention, withdrawal, exports and audit hardening | cross-tenant export denied; purge/restore proven; privacy review |
 | B05 / P1 | 30 Sep–6 Oct | KHQR compatibility evaluation | official spec test corpus; unsupported vs invalid separated; no owner claim |
