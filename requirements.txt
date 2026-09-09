@@ -3,3 +3,4 @@ uvicorn==0.48.0
 pydantic==2.13.4
 Pillow==12.3.0
 opencv-python-headless==4.13.0.92
+weasyprint==68.0

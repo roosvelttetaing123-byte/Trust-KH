@@ -3,13 +3,13 @@ from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from pathlib import Path
 from threading import Lock
+from typing import Literal
 import hashlib
 import io
 import json
 import secrets
 import time
 import uuid
-import zipfile
 
 from fastapi import FastAPI, Request, HTTPException, Header
 from fastapi.exceptions import RequestValidationError
@@ -23,6 +23,7 @@ from .qr import decode_image, MAX_IMAGE_BYTES
 from .schemas import (ScanRequest, ReportRequest, ReviewRequest, LoginRequest,
                       MfaRequest, StaffStatusRequest)
 from .storage import Store, DEFAULT_ORG_ID
+from .pdf_summary import render_summary
 
 class BodyLimit:
     """Cap untrusted bytes before the framework buffers a request body."""
@@ -243,21 +244,18 @@ def create_app(settings: Settings | None = None):
         return Response(status_code=204)
 
     @app.get('/api/scans/{id_}/export')
-    def export(id_:str,authorization:str|None=Header(default=None)):
+    def export(id_:str, lang:Literal['km','en','zh']='km', authorization:str|None=Header(default=None)):
         result=public_result(scans.get(id_,bearer(authorization)))
-        # Do not export tokens, correlation HMACs, unredacted messages or screenshots.
-        evidence={'format':'trust-kh.review-summary.v1','generated_at':int(time.time()),
-                  'assessment':result,'official_report_submitted':False,
-                  'notice':'User-reviewed assessment summary; not certified forensic evidence. Preserve original evidence separately. This ZIP does not include original images or messages.'}
-        raw=json.dumps(evidence,ensure_ascii=False,indent=2).encode()
-        manifest=json.dumps({'summary.json':hashlib.sha256(raw).hexdigest(),
-                             'note':'SHA-256 detects changes to this export; it does not prove a screenshot is authentic or establish chain of custody.'},indent=2).encode()
-        buffer=io.BytesIO()
-        with zipfile.ZipFile(buffer,'w',zipfile.ZIP_DEFLATED) as z:
-            z.writestr('summary.json',raw)
-            z.writestr('manifest.json',manifest)
-            z.writestr('READ-ME.txt','This is not a police complaint. Review the contents, preserve originals separately, and use https://hotline.police.gov.kh/ to submit a complaint. Never share passwords or OTPs. No automatic submission or official integration has occurred.')
-        return Response(buffer.getvalue(),media_type='application/zip',headers={'Content-Disposition':'attachment; filename="trust-kh-review-summary.zip"'})
+        try:
+            document=render_summary(result,lang,id_[:12])
+        except (ImportError,OSError,RuntimeError):
+            # Missing native PDF dependencies or capacity must fail explicitly, not
+            # return a ZIP/HTML error page disguised as a successful PDF download.
+            raise HTTPException(503,'PDF export is unavailable. Please try again later.') from None
+        return Response(document,media_type='application/pdf',headers={
+            'Content-Disposition':f'attachment; filename="trust-kh-check-summary-{lang}.pdf"',
+            'Content-Language':lang,
+        })
 
     @app.get('/api/analyst/reports')
     def report_list(authorization:str|None=Header(default=None)):

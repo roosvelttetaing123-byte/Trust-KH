@@ -12,7 +12,7 @@ def manifest(demo: bool = False) -> dict:
         "working": ["passive_message_url_rules", "qr_image_decode",
                     "on_device_image_redaction", "consented_minimized_reports",
                     "manual_relevance_review", "separated_demo_relationships",
-                    "aggregate_small_cell_suppression", "private_summary_export",
+                    "aggregate_small_cell_suppression", "private_summary_export", "localized_pdf_summary",
                     "named_staff_accounts", "totp_second_factor",
                     "role_capability_authorization", "per_organization_isolation",
                     "actor_attributed_audit_trail", "verified_backup_restore"],

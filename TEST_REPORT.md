@@ -1,3 +1,26 @@
+## Khmer wording pass — 10 September 2026 (RV's Windows machine, this branch)
+
+Terminology only. No risk classification, detection rule, layout or API changed.
+
+- **90 backend tests passed; 6 failed.** All six failures are `test_citizen_pdf.py` plus `test_export_is_not_official_or_original_evidence`, caused by WeasyPrint's native Pango libraries being unavailable on Windows. Verified pre-existing by stashing the wording changes and re-running the same tests on the unmodified branch head: identical failures. Excluding those, **82 passed, 14 deselected**.
+- `scripts/citizen_smoke.py` (real Chromium + HTTP, self-hosted temporary service) passed every step up to the PDF download: loading state and disabled button, `Unknown — not verified` verdict, clear and tab-switch invalidating a late response, `type=tel` phone input, failure preserving input with a persistent retry, and the localized Khmer error assertion. It then failed only at `expect_download` because the renderer is unavailable here.
+- Khmer verified in a real browser at 375 px on a clean origin: no horizontal overflow, correct Khmer shaping with the tracked fonts, and Khmer/English switching correct for headline, field labels and button.
+- **Not verified here: the PDF.** WeasyPrint cannot be imported on this machine, so no PDF was generated or visually inspected — including the two Khmer strings changed in `app/pdf_summary.py`. CI generates all three languages; read the result on the actual commit rather than assuming.
+- An apparent English/Khmer mixed-language bug was investigated and **disproved**: the browser was running a cached 19,199-byte `app.js` from `main` against the branch's HTML. The served file is 26,097 bytes and imports the citizen dictionary. Re-checked on a fresh origin, both languages render correctly.
+- This is jargon removal, not a native-language review. Khmer copy remains a draft.
+
+## Citizen UX / PDF — 9 September 2026 (this branch)
+
+- Fresh baseline from GitHub: 83 backend tests passed before changes. After this slice: **96 backend tests passed** in Python 3.13.5.
+- Python compilation and JavaScript syntax checks pass.
+- Offline Chromium DOM + real TestClient handlers passed adaptive fields; compact link input; actual QR image decode; confirmation; invalid-image feedback; loading/duplicate protection; cancellation after clear/tab switch; localized persistent error and retry; Khmer PDF download; three languages at 320/390/768/1280 px; reduced motion. Zero JavaScript errors.
+- Generated English, Khmer and Chinese PDFs parsed as PDF, with no link annotations or attachments. English/Khmer/Chinese synthetic samples fit one page. Khmer sample rendered and visually inspected with the repository's existing fonts. Source strings remain draft translations; visual rendering is not a native-language review.
+- PDF regressions cover capability/expiry denial, no private fields, language validation, HTML escaping, resource allowlisting, bounded concurrency, and an explicit 503 when the renderer is unavailable. No submitted URL is fetched.
+- Ordinary localhost Chromium navigation remains blocked by this authoring environment. The adapter does not establish HTTP/CSP/service-worker behavior. `scripts/citizen_smoke.py` without `--adapter` and the new Citizen UX checks workflow exercise those separately. Remote results must be read on the actual commit; not inferred here.
+- Docker image/native Windows PDF prerequisites, physical phones and production capacity were not tested here. No live Render changes, real reports, external-provider calls, or risk-engine changes.
+
+---
+
 # Foundation 0.2 — validation record
 
 Observed 9 September 2026. This records development checks, not production readiness or a security certification.
