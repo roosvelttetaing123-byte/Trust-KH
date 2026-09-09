@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased — Project studio on GitHub Pages
+- Added `.github/workflows/pages.yml`, publishing the static project studio from `app/static/project/` so there is no duplicated copy to drift out of date.
+- The workflow refuses to publish if the studio ever starts calling a backend, since GitHub Pages hosts no application and a silent dependency would ship a broken page.
+- The studio's "open the application" link now resolves per context: the running application when served at `/project/`, and the repository when served as static documentation. Previously it was an absolute `/`, which points at nothing on Pages.
+
 ## Unreleased — Hosted demonstration mode
 - Added `TRUST_ENV=demo`, a documented mode for putting the prototype on a public URL for recruited testers. `/api/reports` is refused by the **server** with 403, so a hosted demo is incapable of collecting citizen evidence; the interface reads `/api/capabilities` and reflects that rather than hiding a button.
 - Demo builds require `TRUST_ORIGIN` (an https origin) and send HSTS. `production` is still refused, and demo mode reduces no Gate B or C requirement — recorded as Gate A+ in `docs/RELEASE_GATES.md`.

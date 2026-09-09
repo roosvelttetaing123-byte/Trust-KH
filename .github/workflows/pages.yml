@@ -1,0 +1,54 @@
+name: Project studio (GitHub Pages)
+
+# Publishes app/static/project/ — the public-safe project documentation — to GitHub
+# Pages. It is static: no API calls, no citizen data, no application backend. The
+# application itself is NOT published here; running it needs a Python host, and a
+# public demonstration needs TRUST_ENV=demo (see docs/RELEASE_GATES.md, Gate A+).
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app/static/project/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never let two publishes race; let a queued one finish rather than cancelling it.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Refuse to publish anything but the static studio
+        run: |
+          set -euo pipefail
+          test -f app/static/project/index.html
+          # The studio must stay self-contained: a stray API call would mean it had
+          # started depending on a backend that Pages does not host.
+          if grep -rnE "fetch\(|XMLHttpRequest|/api/" app/static/project/; then
+            echo "::error::The project studio must remain static; it now references a backend."
+            exit 1
+          fi
+          echo "Studio is self-contained."
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: app/static/project
+
+      - id: deploy
+        uses: actions/deploy-pages@v4

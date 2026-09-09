@@ -52,6 +52,21 @@ sign-up route, and there should not be one before the release gates are met.
 
 Rehearse recovery at any time with `python scripts/backup_restore_drill.py`.
 
+### Project studio on GitHub Pages
+
+`app/static/project/` is public-safe project documentation — static, with no API calls,
+no citizen data and no backend. `.github/workflows/pages.yml` publishes it to GitHub
+Pages on pushes to `main` that touch it, and on manual dispatch. It publishes straight
+from `app/static/project/`, so there is no second copy to drift, and it fails the build
+if the studio ever starts calling a backend.
+
+**One manual step:** in the repository settings, under **Pages**, set *Source* to
+**GitHub Actions**. Until that is done the workflow will fail. The site is then served
+at `https://<user>.github.io/Trust-KH/`.
+
+The studio is documentation only. The application is not published there — running it
+needs a Python host, and a public demonstration needs `TRUST_ENV=demo` below.
+
 ### Hosting a public demonstration
 
 `TRUST_ENV=demo` builds a version safe to put on a public URL for recruited testers:
