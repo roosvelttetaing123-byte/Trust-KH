@@ -149,11 +149,13 @@ html[lang="km"] .hero h1{font-size:clamp(1.6rem,3.4vw,2.3rem);line-height:1.5}
 .hero-card-bottom span{font-size:11px;letter-spacing:.09em;font-weight:600;color:#9FD0F5}
 
 .section-hero{background:var(--white);border-bottom:1px solid var(--line);padding:2.75rem 1.5rem 2.5rem}
-.section-hero>*{max-width:var(--wrap);margin-left:auto;margin-right:auto}
+/* One centred container for the whole block. Centring each child independently made
+   the narrower paragraph centre against the viewport instead of lining up with its
+   heading — invisible at ~1200px, badly misaligned on a wide monitor. */
+.section-hero-inner{max-width:var(--wrap);margin:0 auto}
 .section-hero h1{font-size:clamp(1.6rem,3.2vw,2.2rem)}
 .section-hero h1 span{color:var(--blue)}
-/* max-width must not re-center against the .section-hero>* auto margins. */
-.section-hero>p{color:var(--muted);font-size:16px;max-width:70ch;margin-left:0;margin-right:auto}
+.section-hero p{color:var(--muted);font-size:16px;max-width:70ch}
 
 /* ---------- Panels ---------- */
 .workbench{max-width:var(--wrap);margin:2rem auto 0;padding:0 1.5rem;display:grid;
