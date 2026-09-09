@@ -32,3 +32,8 @@ Cut Telegram, geographic maps, native apps, fancy graph drawing and autonomous A
 
 ## Per-task completion record
 Record commit, behavior, acceptance checks, observed test result, limitations, source/dependency decisions and next task. A screenshot is not an integration. A draft policy is not applied access control.
+
+## UX01 — citizen usability and PDF
+Implemented for review: adaptive inputs, direct QR upload/preview/redaction/decode/confirmation, plain-language Khmer, larger controls, reduced motion, visible loading/retry, stale-request cancellation, and capability-protected localized PDF export.
+Acceptance: 96 backend tests observed passing locally; new `scripts/citizen_smoke.py --adapter` passes. The separate HTTP/Chromium workflow verifies the actual branch; review its result before merging.
+Remaining: native-language user review, real iOS/Android file/download behavior, operator confirmation of Render PDF dependencies, and production release gates. This work does not authorize deployment.

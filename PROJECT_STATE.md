@@ -38,3 +38,11 @@ Read `TEST_REPORT.md` for the latest observed result and remaining limitations. 
 
 ## Needs owner decisions
 Pilot partner and approved data scope; deployment target and identity provider; Khmer/English/Chinese wording review; maximum spend and external-provider approval. None of those should block local synthetic development.
+
+## Citizen usability slice — 9 September 2026
+Implemented on `ux/simple-check-and-pdf`, pending PR review (not deployed by this work):
+- Dedicated message, single-line URL/phone, and prominent QR upload controls. Existing QR decoding/redaction retained; explicit decoded-text confirmation.
+- Compact citizen homepage, larger Khmer text, staff links in footer, reduced-motion loading indicators, persistent localized errors, duplicate protection and stale-response cancellation.
+- Authenticated, minimized Khmer/English/Chinese PDF export replaces the citizen ZIP endpoint. New Pango/WeasyPrint deployment requirements are documented in `docs/CITIZEN_UX.md`.
+- No risk-engine, account authorization, report-intake mode, database or live-provider change.
+See the new validation entry in TEST_REPORT.md and the Citizen UX checks workflow. Language copy remains a draft needing native review.

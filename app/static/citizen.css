@@ -1,0 +1,85 @@
+/* Citizen usability layer: no external assets; staff authorization is unchanged. */
+body{font-size:17px;line-height:1.75}
+html[lang="km"] body{font-size:18px;line-height:1.9}
+html[lang="km"] h1,html[lang="km"] h2,html[lang="km"] h3{line-height:1.6;letter-spacing:0}
+.topbar .wrap{justify-content:space-between;min-height:80px}
+.brand-text small{font-size:.82rem;line-height:1.6;letter-spacing:0}
+.lang-select select{min-height:48px;font-size:1rem}
+.notice-strip{font-size:.88rem;line-height:1.7}
+.notice-strip .wrap{max-width:960px;padding:.65rem 1.25rem;justify-content:center}
+.citizen-intro{max-width:800px;margin:0 auto;text-align:center;padding:2rem 1.25rem 1.25rem}
+.citizen-intro h1{font-size:clamp(1.8rem,4vw,2.6rem);letter-spacing:-.025em;margin-bottom:.4rem}
+.citizen-intro p{font-size:1.05em;max-width:56ch;margin:0 auto .5rem;color:var(--muted)}
+.no-account{font-size:.9em;color:var(--blue-dark)}
+#page-check>.workbench{display:flex;flex-direction:column;max-width:800px;gap:1rem;margin:0 auto;padding:0 1.25rem}
+#page-check .panel{width:100%;border-radius:16px;padding:1.5rem}
+#page-check .panel-top{margin-bottom:1rem}
+#page-check .panel-top h2{font-size:1.2em}
+#page-check .tabs{gap:.35rem;padding:.3rem;display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+#page-check .tab{padding:.6rem .25rem;min-height:48px;font-size:.95em;white-space:normal;line-height:1.6}
+.field-label{font-size:1em;line-height:1.8}
+textarea,input[type=text],input[type=tel],input[type=email],input[type=password],select:not(.lang-select select){font:inherit;font-size:1em;line-height:1.8;min-height:52px;padding:.65rem .85rem;width:100%;border:1px solid var(--line);border-radius:8px;background:var(--white);color:var(--ink)}
+#check-text{min-height:138px;max-height:420px;resize:vertical}
+#check-url,#check-phone{min-height:56px;direction:ltr}
+#check-qr{min-height:88px;word-break:break-all}
+.field-note{font-size:.9em;line-height:1.8}
+#input-privacy{margin-top:.85rem}
+.button{min-height:48px;font-size:1em;line-height:1.6;white-space:normal;justify-content:center}
+#run-check{min-height:56px;flex:1;min-width:0}
+#clear-check{min-width:100px}
+.input-actions{align-items:stretch}
+input:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid var(--blue-mid);outline-offset:3px}
+.checkbox{font-size:.95em;align-items:flex-start;line-height:1.8}
+.checkbox input{flex:0 0 auto;width:22px;height:22px;margin-top:.35rem;accent-color:var(--blue)}
+.upload-zone{border:2px dashed var(--blue-line);background:var(--blue-tint);border-radius:12px;text-align:center;padding:1.1rem}
+.upload-zone.dragging{border-color:var(--blue);background:#e6f1fc}
+.upload-symbol{display:block;color:var(--blue);font-size:1.8rem;line-height:1.2}
+.upload-zone h3{font-size:1.15em}
+.upload-zone p{font-size:.95em}
+input[type=file]{font:inherit;font-size:.9em;max-width:100%;padding:.3rem;background:white;border-radius:8px}
+input[type=file]::file-selector-button{min-height:44px;border:0;border-radius:6px;background:var(--blue);color:white;font:inherit;padding:.4rem .7rem;margin-right:.7rem;cursor:pointer}
+#image-canvas{max-width:100%;max-height:280px;width:auto;height:auto;margin:1rem auto}
+.work-status{font-size:.95em;color:var(--blue-dark);margin:.5rem 0 0;min-height:0}
+.work-status:empty{display:none}
+.inline-error{padding:.75rem 1rem;background:var(--red-bg);border:1px solid var(--red-line);border-radius:8px;color:var(--red);margin-top:.75rem;overflow-wrap:anywhere}
+.working-mark{display:inline-grid;place-items:center;position:relative;width:30px;height:30px;flex:0 0 auto}
+.working-mark::before{content:"";position:absolute;inset:0;border:2px solid #ffffff55;border-top-color:white;border-radius:50%;animation:working-turn .85s linear infinite}
+.working-mark img{width:20px;height:20px;background:white;border-radius:50%}
+@keyframes working-turn{to{transform:rotate(360deg)}}
+#run-check[aria-busy="true"]{opacity:1;cursor:wait}
+#page-check .examples{margin:0;padding:.5rem 0 0;border:0}
+.examples button{min-height:44px;font-size:.9em;letter-spacing:0}
+#page-check>.limitations,#page-check>.withdraw{width:calc(100% - 2.5rem);max-width:760px;margin:1rem auto 0;box-shadow:none;background:transparent}
+details>summary{font-size:1em;line-height:1.7;min-height:44px}
+.result-section-title{font-size:1em;letter-spacing:0;line-height:1.8}
+.signal p,.steps{font-size:1em;line-height:1.85}
+.verdict-label{font-size:1.25em;line-height:1.8}
+.verdict-box p{font-size:.95em}
+.chip{max-width:100%;overflow-wrap:anywhere;font-size:.9em}
+.result-details .field-note,.signal small{overflow-wrap:anywhere}
+.result-actions .button{flex:1}
+footer{margin-top:2rem}
+.footer-inner{max-width:1000px}
+.footer-links a{min-height:44px;display:inline-flex;align-items:center;font-size:.95rem}
+footer p{font-size:.9em;line-height:1.8}
+@media(max-width:500px){
+ .topbar .wrap{padding:.6rem 1rem;gap:.5rem;flex-wrap:nowrap}
+ .brand-text small{display:none}.brandmark{width:34px;height:34px}.brand-name{font-size:18px}
+ .citizen-intro{padding:1.25rem 1rem 1rem}.citizen-intro h1{font-size:1.75rem}
+ #page-check>.workbench{padding:0 .8rem}
+ #page-check .panel{padding:1.05rem;border-radius:12px}
+ #page-check .tabs{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #page-check>.limitations,#page-check>.withdraw{width:calc(100% - 1.6rem)}
+ .input-actions{gap:.5rem}#clear-check{min-width:80px}
+ .button-row .button{flex:1}.footer-inner{display:block}
+ .brand,.brand-text{min-width:0}.lang-select select{padding-left:1.8rem;padding-right:1.7rem}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.working-mark::before{animation:none}*,*::before,*::after{transition:none!important}}
+
+#page-check .input-actions .button{flex-basis:auto}
+footer .footer-inner{gap:1.5rem;padding-top:1.5rem;padding-bottom:1.5rem}
+footer .footer-links{flex-direction:row;flex-wrap:wrap;gap:.25rem 1rem;max-width:420px}
+footer .footer-links a{color:#edf4ff}
+footer .footer-links a:hover{color:#fff;text-decoration:underline}
+footer p{color:#d9e8f9}
+#result-panel{scroll-margin-top:100px}

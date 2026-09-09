@@ -1,3 +1,15 @@
+## Citizen UX / PDF — 9 September 2026 (this branch)
+
+- Fresh baseline from GitHub: 83 backend tests passed before changes. After this slice: **96 backend tests passed** in Python 3.13.5.
+- Python compilation and JavaScript syntax checks pass.
+- Offline Chromium DOM + real TestClient handlers passed adaptive fields; compact link input; actual QR image decode; confirmation; invalid-image feedback; loading/duplicate protection; cancellation after clear/tab switch; localized persistent error and retry; Khmer PDF download; three languages at 320/390/768/1280 px; reduced motion. Zero JavaScript errors.
+- Generated English, Khmer and Chinese PDFs parsed as PDF, with no link annotations or attachments. English/Khmer/Chinese synthetic samples fit one page. Khmer sample rendered and visually inspected with the repository's existing fonts. Source strings remain draft translations; visual rendering is not a native-language review.
+- PDF regressions cover capability/expiry denial, no private fields, language validation, HTML escaping, resource allowlisting, bounded concurrency, and an explicit 503 when the renderer is unavailable. No submitted URL is fetched.
+- Ordinary localhost Chromium navigation remains blocked by this authoring environment. The adapter does not establish HTTP/CSP/service-worker behavior. `scripts/citizen_smoke.py` without `--adapter` and the new Citizen UX checks workflow exercise those separately. Remote results must be read on the actual commit; not inferred here.
+- Docker image/native Windows PDF prerequisites, physical phones and production capacity were not tested here. No live Render changes, real reports, external-provider calls, or risk-engine changes.
+
+---
+
 # Foundation 0.2 — validation record
 
 Observed 9 September 2026. This records development checks, not production readiness or a security certification.

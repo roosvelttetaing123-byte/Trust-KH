@@ -5,17 +5,10 @@
   <meta name="theme-color" content="#1B63C4">
   <meta name="description" content="Trust.kh — ពិនិត្យសារ តំណ លេខទូរស័ព្ទ និង QR ដែលគួរឱ្យសង្ស័យ។ Explainable, privacy-conscious scam triage for Cambodia.">
   <link rel="manifest" href="/manifest.webmanifest"><link rel="icon" href="/icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/style.css"><title>Trust.kh · ពិនិត្យមុននឹងជឿ</title>
+  <link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/citizen.css"><title>Trust.kh · ពិនិត្យមុននឹងជឿ</title>
 </head>
 <body>
 <a class="skip" href="#main" data-i18n="skip">រំលងទៅមាតិកា</a>
-
-<div class="gov-strip">
-  <div class="wrap">
-    <span><span class="dot" aria-hidden="true"></span><strong data-i18n="govTitle">ថ្នាលសាកល្បងឯករាជ្យសម្រាប់សុវត្ថិភាពឌីជីថល</strong></span>
-    <span data-i18n="govNote">មិនមែនជាសេវាកម្មរបស់រដ្ឋាភិបាល ធនាគារ ឬអាជ្ញាធរណាមួយឡើយ។</span>
-  </div>
-</div>
 
 <header class="topbar">
   <div class="wrap">
@@ -26,11 +19,6 @@
         <small data-i18n="brandSub">ទំនុកចិត្តឌីជីថល សម្រាប់កម្ពុជា</small>
       </span>
     </a>
-    <nav data-i18n-label="navLabel" aria-label="ការរុករកមេ">
-      <button class="nav active" data-page="check" data-i18n="checkNav">ពិនិត្យ</button>
-      <button class="nav" data-page="analyst" data-i18n="analystNav">អ្នកវិភាគ</button>
-      <button class="nav" data-page="pulse" data-i18n="pulseNav">ទិន្នន័យសង្ខេប</button>
-    </nav>
     <div class="lang-select">
       <span class="globe" aria-hidden="true">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -58,81 +46,91 @@
 <main id="main">
 
 <section id="page-check" class="page">
-  <div class="hero-layout">
-    <div class="hero-inner">
-      <div class="hero">
-        <div class="eyebrow" data-i18n="eyebrow">ពិនិត្យបន្តិច មុននឹងសម្រេចចិត្ត</div>
-        <h1 data-i18n="headline">មុននឹងចុច។<br>មុននឹងបង់ប្រាក់។<br><span>ពិនិត្យមុននឹងជឿ។</span></h1>
-        <p data-i18n="heroCopy">ទទួលបានសារ តំណ លេខទូរស័ព្ទ ឬ QR ដែលគួរឱ្យសង្ស័យ? ស្វែងយល់ពីសញ្ញាព្រមាន និងអ្វីដែលគួរធ្វើបន្ទាប់។</p>
-        <div class="promise-row">
-          <span data-i18n="promise1">មិនចាំបាច់បង្កើតគណនី</span>
-          <span data-i18n="promise2">អ្នកសម្រេចថាត្រូវរាយការណ៍ឬអត់</span>
-          <span data-i18n="promise3">បង្ហាញមូលហេតុ មិនធានាសុវត្ថិភាព</span>
-        </div>
-      </div>
-      <aside class="hero-card" data-i18n-label="heroCardLabel" aria-label="គោលការណ៍ផលិតផល">
-        <div class="eyebrow" data-i18n="heroCardEyebrow">ជំហានបន្ទាប់ដ៏ច្បាស់លាស់</div>
-        <div class="hero-card-mark" aria-hidden="true">?</div>
-        <h2 data-i18n="heroCardTitle">កាត់បន្ថយភាពមិនច្បាស់។<br>សម្រេចចិត្តដោយមានព័ត៌មាន។</h2>
-        <p data-i18n="heroCardCopy">ជាហេតុផលឱ្យឈប់គិត។ ជាភស្តុតាងសម្រាប់ត្រួតពិនិត្យ។<br>មិនមែនជាការធានាថាមានសុវត្ថិភាពទេ។</p>
-        <div class="hero-card-bottom">
-          <span data-i18n="stepCheck">ពិនិត្យ</span>
-          <span data-i18n="stepUnderstand">យល់ដឹង</span>
-          <span data-i18n="stepDecide">សម្រេចចិត្ត</span>
-        </div>
-      </aside>
-    </div>
+  <div class="citizen-intro">
+    <h1 data-i18n="headline">ពិនិត្យមុននឹងជឿ។</h1>
+    <p data-i18n="heroCopy">ពិនិត្យសារ តំណ លេខទូរស័ព្ទ ឬកូដ QR ដែលគួរឱ្យសង្ស័យ។</p>
+    <span class="no-account" data-i18n="promise1">មិនចាំបាច់បង្កើតគណនី</span>
   </div>
 
   <div class="workbench">
     <article class="panel input-panel">
       <div class="panel-top">
         <div>
-          <div class="eyebrow" data-i18n="stepOne">០១ / ការពិនិត្យរបស់អ្នក</div>
-          <h2 data-i18n="inputTitle">តើអ្វីធ្វើឱ្យអ្នកសង្ស័យ?</h2>
+
+          <h2 data-i18n="inputTitle">តើអ្នកចង់ពិនិត្យអ្វី?</h2>
         </div>
-        <span class="private-badge" data-i18n="privateBadge">រក្សាភាពឯកជន</span>
+
       </div>
       <div class="tabs" role="group" data-i18n-label="inputTypeLabel" aria-label="ប្រភេទព័ត៌មាន">
         <button class="tab active" data-kind="message" data-i18n="message">សារ</button>
         <button class="tab" data-kind="url" data-i18n="link">តំណ</button>
-        <button class="tab" data-kind="phone" data-i18n="phone">ទូរស័ព្ទ</button>
-        <button class="tab" data-kind="qr" data-i18n="qr">អត្ថបទ QR</button>
+        <button class="tab" data-kind="phone" data-i18n="phone">លេខទូរស័ព្ទ</button>
+        <button class="tab" data-kind="qr" data-i18n="qr">កូដ QR</button>
       </div>
-      <label class="field-label" for="check-text" data-i18n="inputLabel">បិទភ្ជាប់ព័ត៌មានដែលអ្នកចង់ពិនិត្យ</label>
-      <textarea id="check-text" rows="6" maxlength="6000" autocomplete="off" spellcheck="false"></textarea>
-      <p class="field-note" data-i18n="inputPrivacy">គំរូនេះមិនរក្សាទុកសារដើមទេ។ មានតែការរាយការណ៍ដោយមានការយល់ព្រមប៉ុណ្ណោះ ដែលរក្សាទុកព័ត៌មានចាំបាច់។ កុំបញ្ចូលលេខសម្ងាត់។</p>
+      <div id="message-input" data-input="message">
+        <label class="field-label" for="check-text" data-i18n="messageLabel">បិទភ្ជាប់សារដែលអ្នកចង់ពិនិត្យ</label>
+        <textarea id="check-text" rows="4" maxlength="6000" autocomplete="off" spellcheck="false" aria-describedby="input-privacy"></textarea>
+      </div>
+      <div class="hidden" data-input="url">
+        <label class="field-label" for="check-url" data-i18n="urlLabel">បិទភ្ជាប់តំណដែលអ្នកចង់ពិនិត្យ</label>
+        <input id="check-url" type="text" inputmode="url" maxlength="6000" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="https://example.com" aria-describedby="input-privacy">
+      </div>
+      <div class="hidden" data-input="phone">
+        <label class="field-label" for="check-phone" data-i18n="phoneLabel">បញ្ចូលលេខទូរស័ព្ទ</label>
+        <input id="check-phone" type="tel" inputmode="tel" maxlength="64" autocomplete="off" placeholder="+855 …" aria-describedby="phone-help input-privacy">
+        <p id="phone-help" class="field-note" data-i18n="phoneHelp">នេះមិនមែនជាការផ្ទៀងផ្ទាត់ម្ចាស់លេខទូរស័ព្ទទេ។</p>
+      </div>
+      <section id="qr-input" class="hidden" data-input="qr" aria-label="QR">
+        <div id="qr-dropzone" class="upload-zone">
+          <span class="upload-symbol" aria-hidden="true">↑</span>
+          <h3 data-i18n="uploadTitle">បញ្ចូលរូបភាពកូដ QR</h3>
+          <p data-i18n="uploadHint">ជ្រើសរើសរូបភាពពីទូរស័ព្ទ ឬកុំព្យូទ័ររបស់អ្នក។</p>
+          <label for="image-file" class="field-label" data-i18n="chooseImage">ជ្រើសរើសរូបភាព</label>
+          <input type="file" id="image-file" accept="image/png,image/jpeg" aria-describedby="upload-limits qr-privacy">
+          <p id="upload-limits" class="field-note" data-i18n="uploadLimits">PNG / JPG · មិនលើស 2 MiB និង 6 មេហ្គាភីកសែល</p>
+        </div>
+        <p id="qr-privacy" class="field-note" data-i18n="qrPrivacy">រូបភាពនឹងត្រូវផ្ញើទៅម៉ាស៊ីនមេ នៅពេលអ្នកចុច «អានកូដ QR»។ រូបភាពមិនត្រូវបានរក្សាទុកទេ។</p>
+        <div id="canvas-wrap" class="hidden">
+          <p class="field-note" data-i18n="redactInstruction">អូសលើព័ត៌មានផ្ទាល់ខ្លួនដើម្បីបិទបាំង។ កុំបិទបាំងកូដ QR។</p>
+          <canvas id="image-canvas" aria-label="QR image preview"></canvas>
+          <div class="button-row">
+            <button id="decode-qr" class="button secondary" data-i18n="decodeQr">អានកូដ QR</button>
+            <button id="remove-image" class="button quiet" data-i18n="removeImage">ដករូបភាពចេញ</button>
+            <button id="save-image" class="button quiet" data-i18n="saveImage">រក្សាទុករូបដែលបានបិទបាំង</button>
+          </div>
+        </div>
+        <p id="qr-status" class="work-status" role="status" aria-live="polite"></p>
+        <div id="qr-error" class="inline-error hidden" role="alert"></div>
+        <details id="qr-manual">
+          <summary data-i18n="qrManual">ឬ បិទភ្ជាប់អត្ថបទពីកូដ QR</summary>
+          <label class="field-label" for="check-qr" data-i18n="qrTextLabel">ពិនិត្យព័ត៌មានដែលបានអានពីកូដ QR</label>
+          <textarea id="check-qr" rows="2" maxlength="6000" autocomplete="off" spellcheck="false"></textarea>
+          <label class="checkbox"><input type="checkbox" id="qr-confirm"><span data-i18n="qrConfirm">ខ្ញុំបានពិនិត្យព័ត៌មានខាងលើ ហើយចង់ពិនិត្យសញ្ញាព្រមាន។</span></label>
+          <p class="field-note" data-i18n="qrNoticeShort">ការអានកូដ QR មិនបញ្ជាក់អត្តសញ្ញាណអ្នកទទួលប្រាក់ទេ។</p>
+        </details>
+      </section>
+      <p id="input-privacy" class="field-note" data-i18n="inputPrivacy">សូមលុបលេខសម្ងាត់ និងលេខកូដ OTP មុនពេលពិនិត្យ។ យើងមិនរក្សាទុកសារដើមទេ។</p>
       <div class="input-actions">
-        <button class="button primary" id="run-check" data-i18n="runCheck">ពិនិត្យសញ្ញាព្រមាន</button>
+        <button class="button primary" id="run-check"><span class="working-mark hidden" aria-hidden="true"><img src="/icon.svg" alt="" width="22" height="22"></span><span id="check-button-label" data-i18n="runCheck">ពិនិត្យឥឡូវនេះ</span></button>
         <button class="button quiet" id="clear-check" data-i18n="clear">សម្អាត</button>
       </div>
-      <div class="examples">
-        <span data-i18n="tryExample">សាកល្បងជាមួយទិន្នន័យគំរូ</span>
-        <button data-example="otp" data-i18n="exOtp">សំណើ OTP</button>
-        <button data-example="unknown" data-i18n="exUnknown">តំណមិនស្គាល់</button>
-        <button data-example="advice" data-i18n="exAdvice">ការណែនាំសុវត្ថិភាព</button>
-      </div>
-      <details class="image-tools">
-        <summary data-i18n="imageTitle">បន្ថែមរូបភាព / អាន QR</summary>
-        <p class="field-note" data-i18n="imageNote">រូបភាពត្រូវបានបង្ហាញ និងលាក់ព័ត៌មាននៅលើឧបករណ៍របស់អ្នក។ មុខងារអានអត្ថបទពីរូបភាពមិនទាន់មានទេ។ សូមវាយអត្ថបទខាងលើ។</p>
-        <label for="image-file" class="field-label" data-i18n="chooseImage">ជ្រើសរូប PNG/JPEG (មិនលើស 2 MiB / 6 មេហ្គាភីកសែល)</label>
-        <input type="file" id="image-file" accept="image/png,image/jpeg">
-        <div id="canvas-wrap" class="hidden">
-          <p class="field-note" data-i18n="redactInstruction">អូសលើព័ត៌មានផ្ទាល់ខ្លួនដើម្បីបិទបាំង។ រូបដើមមិនត្រូវបានផ្លាស់ប្តូរទេ។</p>
-          <canvas id="image-canvas" data-i18n-label="canvasLabel" aria-label="ផ្ទាំងបិទបាំងរូបភាព"></canvas>
-          <div class="button-row">
-            <button id="decode-qr" class="button secondary" data-i18n="decodeQr">ផ្ញើរូបដែលបានបិទបាំង និងអាន QR</button>
-            <button id="save-image" class="button quiet" data-i18n="saveImage">រក្សាទុកច្បាប់ចម្លង</button>
-          </div>
+      <p id="check-status" class="work-status" role="status" aria-live="polite" aria-atomic="true"></p>
+      <div id="check-error" class="inline-error hidden" role="alert"></div>
+      <details class="examples-help">
+        <summary data-i18n="tryExample">សាកល្បងជាមួយសារគំរូ</summary>
+        <div class="examples">
+          <button data-example="otp" data-i18n="exOtp">សំណើ OTP</button>
+          <button data-example="unknown" data-i18n="exUnknown">តំណមិនស្គាល់</button>
+          <button data-example="advice" data-i18n="exAdvice">ការណែនាំសុវត្ថិភាព</button>
         </div>
       </details>
     </article>
 
-    <article class="panel result-panel" aria-live="polite" aria-atomic="false">
+    <article class="panel result-panel hidden" id="result-panel" tabindex="-1" aria-labelledby="result-heading">
       <div class="panel-top">
         <div>
           <div class="eyebrow" data-i18n="stepTwo">០២ / ស្វែងយល់ពីសញ្ញាព្រមាន</div>
-          <h2 data-i18n="resultTitle">យល់ច្បាស់ មុននឹងធ្វើសកម្មភាព។</h2>
+          <h2 id="result-heading" data-i18n="resultTitle">យល់ច្បាស់ មុននឹងធ្វើសកម្មភាព។</h2>
         </div>
         <span class="result-symbol" aria-hidden="true">◇</span>
       </div>
@@ -148,13 +146,11 @@
     </article>
   </div>
 
-  <div class="principles">
-    <div class="principles-inner">
-      <div><span aria-hidden="true">◎</span><h3 data-i18n="principle1Title">មិនទាន់ដឹង មិនមែនមានន័យថាសុវត្ថិភាពទេ។</h3><p data-i18n="principle1Copy">លទ្ធផលនេះមិនបញ្ជាក់សុវត្ថិភាពរបស់បុគ្គល គេហទំព័រ ឬការបង់ប្រាក់ទេ។</p></div>
-      <div><span aria-hidden="true">◇</span><h3 data-i18n="principle2Title">រឿងរបស់អ្នកមិនមែនជាបញ្ជីខ្មៅសាធារណៈទេ។</h3><p data-i18n="principle2Copy">ការរាយការណ៍ត្រូវការការយល់ព្រម និងការត្រួតពិនិត្យ។ សារឯកជនមិនត្រូវបង្ហាញក្នុងផ្ទាំងទិន្នន័យទេ។</p></div>
-      <div><span aria-hidden="true">↗</span><h3 data-i18n="principle3Title">ជាស្ពាន មិនមែនជាអាជ្ញាធរ។</h3><p data-i18n="principle3Copy">ការរាយការណ៍នៅ Trust.kh មិនមែនជាការដាក់ពាក្យបណ្ដឹងផ្លូវការទេ។</p></div>
-    </div>
-  </div>
+  <details class="limitations panel" id="limitations">
+    <summary data-i18n="limitationsTitle">អ្វីដែលអាចពិនិត្យបាន និងអ្វីដែលមិនអាចបញ្ជាក់បាន</summary>
+    <p data-i18n="limitationsCopy">លទ្ធផលផ្អែកលើសញ្ញាព្រមានមូលដ្ឋាន។ យើងមិនបើកតំណ មិនពិនិត្យទិន្នន័យធនាគារ និងមិនធានាថាមានសុវត្ថិភាពទេ។</p>
+    <p data-i18n="imageNote">មិនទាន់អាចអានអត្ថបទសារពីរូបភាពបានទេ។ សូមបិទភ្ជាប់ ឬវាយសារដោយខ្លួនឯង។</p>
+  </details>
 
   <details class="withdraw panel">
     <summary data-i18n="withdrawTitle">ដករបាយការណ៍ដែលបានផ្ញើ</summary>
@@ -225,11 +221,14 @@
       <a class="footer-brand" href="#check">TRUST<em>.KH</em></a>
       <p data-i18n="footer">បង្កើតនៅកម្ពុជា ដើម្បីទំនុកចិត្ត។ នេះជាម៉ាកសាកល្បង មិនអះអាងកម្មសិទ្ធិឈ្មោះដែន ការទទួលស្គាល់ ឬការគាំទ្រពីរដ្ឋាភិបាលទេ។</p>
     </div>
-    <div class="footer-links">
+    <nav class="footer-links" aria-label="More options">
+      <a href="#check" data-page="check" data-i18n="checkNav">ពិនិត្យ</a>
+      <a href="#analyst" data-page="analyst" data-i18n="staffSignIn">ចូលប្រើសម្រាប់បុគ្គលិក</a>
+      <a href="#pulse" data-page="pulse" data-i18n="pulseNav">ទិន្នន័យសង្ខេប</a>
       <a class="studio-link" href="/project/" data-i18n="projectStudio">កន្លែងគម្រោង ↗</a>
       <a href="/api/openapi.json" target="_blank" rel="noopener" data-i18n="apiContract">កិច្ចសន្យា API ↗</a>
       <a href="https://hotline.police.gov.kh/" target="_blank" rel="noopener noreferrer" data-i18n="policePortal">ការរាយការណ៍ផ្លូវការរបស់នគរបាល ↗</a>
-    </div>
+    </nav>
   </div>
 </footer>
 <div id="toast" class="toast hidden" role="status"></div>

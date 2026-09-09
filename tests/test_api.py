@@ -3,7 +3,7 @@ import json
 import sqlite3
 from contextlib import closing
 import time
-import zipfile
+from pypdf import PdfReader
 import qrcode
 from PIL import Image
 from app.storage import DEFAULT_ORG_ID
@@ -118,15 +118,15 @@ def test_pulse_small_cell_and_demo_separation(client,auth_header):
 
 def test_export_is_not_official_or_original_evidence(client):
     s=scan(client)
-    response=client.get('/api/scans/'+s['scan_id']+'/export',headers=auth(s['access_token']))
+    response=client.get('/api/scans/'+s['scan_id']+'/export?lang=en',headers=auth(s['access_token']))
     assert response.status_code==200
-    with zipfile.ZipFile(io.BytesIO(response.content)) as z:
-        summary=json.loads(z.read('summary.json'))
-        all_content=' '.join(z.read(name).decode() for name in z.namelist())
-    assert not summary['official_report_submitted']
-    assert s['access_token'] not in all_content
-    assert '_key' not in all_content
-    assert 'original images' in all_content
+    assert response.headers['content-type']=='application/pdf'
+    reader=PdfReader(io.BytesIO(response.content))
+    content=' '.join(p.extract_text() for p in reader.pages)
+    assert 'not a certificate or an official complaint' in content
+    assert s['access_token'] not in content
+    assert 'No original messages' in content
+    assert not reader.attachments
 
 def test_foreign_origin_blocked(client):
     r=client.post('/api/scans',json={'kind':'message','text':'Hello'},headers={'Origin':'https://unrelated.test'})
