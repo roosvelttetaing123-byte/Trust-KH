@@ -1,5 +1,5 @@
 // Cache the static app shell only. Never cache requests, API results, images or credentials.
-const CACHE='trust-kh-shell-v3';
+const CACHE='trust-kh-shell-v4';
 const ASSETS=['/','/index.html','/style.css','/app.js','/i18n.js','/icon.svg','/manifest.webmanifest',
  '/fonts/kantumruy-pro-khmer.woff2','/fonts/kantumruy-pro-latin.woff2','/fonts/kantumruy-pro-latin-ext.woff2'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)));self.skipWaiting();});

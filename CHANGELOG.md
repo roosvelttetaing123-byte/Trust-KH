@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased — Trust.kh brand mark
+- Replaced the placeholder `T✓` tile with the commissioned shield mark: Angkor towers, verification check, orbit and accent dots, hand-built as SVG so it stays sharp at favicon and retina sizes.
+- Wordmark is now uppercase `TRUST.KH` with the `.KH` in the brand orange `#F58220`, in the header and the footer.
+- The accent is a token (`--brand-accent`) used only for the wordmark. It is deliberately **not** a call-to-action colour: orange buttons would pull the interface out of the institutional register the rest of the palette holds, which is what makes the product read as credible.
+- The mark's darkest blue is now `#014F99`, the same token the interface uses, so the logo and the UI share a colour rather than merely coordinating.
+- Bumped the service-worker cache to `v4`. Without it, returning visitors keep the previous icon, stylesheet and manifest — the same stale-shell trap hit earlier in development.
+- Corrected `manifest.webmanifest`, whose `theme_color`/`background_color` were still the pre-redesign `#0b172a`/`#f4f7f7` and disagreed with the page's own `theme-color` meta tag.
+
+**Open question, deliberately not resolved in code:** the mark places a national monument
+inside a security shield with a verification check, under the country's TLD, for a product
+that must not imply state endorsement. The towers are isolated as `#tk-towers` in
+`icon.svg` so they can be removed without touching the rest of the mark.
+
 ## Unreleased — Project studio on GitHub Pages
 - Added `.github/workflows/pages.yml`, publishing the static project studio from `app/static/project/` so there is no duplicated copy to drift out of date.
 - The workflow refuses to publish if the studio ever starts calling a backend, since GitHub Pages hosts no application and a silent dependency would ship a broken page.
