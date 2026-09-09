@@ -1,3 +1,14 @@
+## Khmer wording pass — 10 September 2026 (RV's Windows machine, this branch)
+
+Terminology only. No risk classification, detection rule, layout or API changed.
+
+- **90 backend tests passed; 6 failed.** All six failures are `test_citizen_pdf.py` plus `test_export_is_not_official_or_original_evidence`, caused by WeasyPrint's native Pango libraries being unavailable on Windows. Verified pre-existing by stashing the wording changes and re-running the same tests on the unmodified branch head: identical failures. Excluding those, **82 passed, 14 deselected**.
+- `scripts/citizen_smoke.py` (real Chromium + HTTP, self-hosted temporary service) passed every step up to the PDF download: loading state and disabled button, `Unknown — not verified` verdict, clear and tab-switch invalidating a late response, `type=tel` phone input, failure preserving input with a persistent retry, and the localized Khmer error assertion. It then failed only at `expect_download` because the renderer is unavailable here.
+- Khmer verified in a real browser at 375 px on a clean origin: no horizontal overflow, correct Khmer shaping with the tracked fonts, and Khmer/English switching correct for headline, field labels and button.
+- **Not verified here: the PDF.** WeasyPrint cannot be imported on this machine, so no PDF was generated or visually inspected — including the two Khmer strings changed in `app/pdf_summary.py`. CI generates all three languages; read the result on the actual commit rather than assuming.
+- An apparent English/Khmer mixed-language bug was investigated and **disproved**: the browser was running a cached 19,199-byte `app.js` from `main` against the branch's HTML. The served file is 26,097 bytes and imports the citizen dictionary. Re-checked on a fresh origin, both languages render correctly.
+- This is jargon removal, not a native-language review. Khmer copy remains a draft.
+
 ## Citizen UX / PDF — 9 September 2026 (this branch)
 
 - Fresh baseline from GitHub: 83 backend tests passed before changes. After this slice: **96 backend tests passed** in Python 3.13.5.
