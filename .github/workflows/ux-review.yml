@@ -1,0 +1,21 @@
+name: UX review
+on:
+  push:
+    branches: [ux/simple-check-and-pdf]
+permissions:
+  contents: read
+jobs:
+  source-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Snapshot tracked source for isolated review
+        run: git archive --format=zip HEAD -o /tmp/trust-kh-source.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ux-review-source
+          path: /tmp/trust-kh-source.zip
+          retention-days: 1
