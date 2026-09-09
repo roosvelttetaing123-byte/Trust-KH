@@ -52,6 +52,33 @@ sign-up route, and there should not be one before the release gates are met.
 
 Rehearse recovery at any time with `python scripts/backup_restore_drill.py`.
 
+### Hosting a public demonstration
+
+`TRUST_ENV=demo` builds a version safe to put on a public URL for recruited testers:
+the server **refuses report intake with 403**, so no citizen evidence can be collected.
+The interface reads that from `/api/capabilities` and says so; it is not a hidden button.
+
+Check it locally first — this runs the same code path as the deployment:
+
+```bash
+python scripts/demo.py
+```
+
+To deploy, use the `Dockerfile` on any host that sets `$PORT` (Render, Fly.io, Hugging
+Face Spaces). Required environment:
+
+| Variable | Value |
+|---|---|
+| `TRUST_ENV` | `demo` |
+| `TRUST_ORIGIN` | the public `https://` origin, e.g. `https://your-demo.onrender.com` |
+| `TRUST_HMAC_KEY` | a fresh 40+ character random secret — **not** the one from your local `.env` |
+| `TRUST_DB` | a scratch path; the pilot database must never be deployed |
+
+Read [Gate A+ in the release gates](docs/RELEASE_GATES.md) before publishing the link.
+A hosted demo is for recruited testers and partner walkthroughs; inviting the general
+public to check real messages is Gate C and needs security testing, abuse controls,
+incident response and published privacy/limitations pages.
+
 **Do not expose the prototype through a public tunnel or deploy it with real citizen evidence.** Public-launch requirements are in [release gates](docs/RELEASE_GATES.md). The project does not require paid services to run locally.
 
 ## What works / what does not

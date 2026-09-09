@@ -2,6 +2,19 @@
 
 Observed 9 September 2026. This records development checks, not production readiness or a security certification.
 
+## Hosted demo mode — executed on the owner's Windows machine (9 September 2026)
+
+- **82 pytest tests passed** (74 previous plus 8 for demo mode).
+- The report-intake block was verified **against the API directly from the browser console**, not only through the interface: a fully valid report request with a live scan token returned 403. A tester who opens developer tools cannot submit evidence either.
+- Demo build served locally through `scripts/demo.py` on the same code path as the deployment: capability manifest reported `mode=public_demo` and `report_intake=false`, the header showed the demonstration notice, the withdrawal panel was hidden, and the checker still produced a full `high_risk` result with reasons and coverage.
+- `production` remains refused by `Settings.from_env`; demo mode refuses to start without an `https` `TRUST_ORIGIN`.
+
+### Defect found and fixed
+Loopback origins were pinned to port 8000, so the demo build on another port was rejected by its own origin check and every API call returned 403. That meant the demo could not be tested locally before going public — the first real browser run would have been in production. Loopback is now allowed on any port.
+
+### Not established
+No hosting provider has been used, so TLS termination, cold starts, provider request limits, real-device and slow-network behaviour are untested. Demo mode does not reduce any Gate B or C requirement; it only guarantees that report intake is off.
+
 ## B01 identity slice — executed on the owner's Windows machine (9 September 2026)
 
 - **74 pytest tests passed** (53 previous plus 21 covering identity, authorization, tenant isolation, audit and recovery).

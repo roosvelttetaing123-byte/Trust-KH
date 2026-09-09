@@ -5,6 +5,19 @@ The source intentionally refuses `TRUST_ENV` values other than local/test. Do no
 ## Gate A — local synthetic demo
 Backend regressions pass; main UI flow works; fixtures are labelled; no external requests; source and output contain no secrets; unsupported features are visible. Browser HTTP/CSP/service-worker testing must be reported separately from DOM-adapter tests.
 
+### Gate A+ — hosted synthetic demonstration (`TRUST_ENV=demo`)
+Gate A on a public URL, for recruited testers and partner walkthroughs. Permitted because
+**no citizen evidence can be collected**: `/api/reports` is refused by the server with 403,
+not hidden in the interface, and the interface reads the server's capability manifest rather
+than assuming. Withdrawal is hidden because there is nothing to withdraw. Requires
+`TRUST_ORIGIN` set to the public https origin, and sends HSTS.
+
+This is **not** Gate C. It does not authorise inviting the general public to check real
+scam messages, and it does not reduce any Gate B or C requirement. Anyone hosting it must
+still expect real people to paste real messages into the checker, so the "unknown is not
+safe" wording and the not-a-government-service disclaimer carry the safety load and must
+stay visible. If report intake is ever wanted on a public URL, that is Gate C.
+
 ## Gate B — approved controlled pilot
 Named staff identity and MFA; organization-level authorization at every route/job/export; persistent migrated database; backups and observed restore; retention job; deletion/withdrawal semantics; documented data scope and privacy notice; correction process; qualified local legal review as needed; Khmer review; approved provider contracts and quotas; isolated and bounded image processing; redaction and error-recovery tests. Real evidence must not be placed in Git, issue attachments or model prompts without a specifically approved data path.
 

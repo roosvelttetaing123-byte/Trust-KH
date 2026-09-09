@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased — Hosted demonstration mode
+- Added `TRUST_ENV=demo`, a documented mode for putting the prototype on a public URL for recruited testers. `/api/reports` is refused by the **server** with 403, so a hosted demo is incapable of collecting citizen evidence; the interface reads `/api/capabilities` and reflects that rather than hiding a button.
+- Demo builds require `TRUST_ORIGIN` (an https origin) and send HSTS. `production` is still refused, and demo mode reduces no Gate B or C requirement — recorded as Gate A+ in `docs/RELEASE_GATES.md`.
+- Loopback origins are now allowed on any port, so the exact demo build can be exercised locally (`scripts/demo.py`) before it is published, instead of first running in production. Exact-port matching on loopback prevented running the demo alongside the dev server and provided no protection, since anything on the machine can choose its port.
+- `Dockerfile` now honours `$PORT` for managed hosts.
+
 ## Unreleased — B01: named staff identity, tenant isolation and audit
 - Replaced the two shared static access keys with **named staff accounts**: scrypt password hashing, a TOTP second factor verified against the RFC 6238 vectors, server-side sessions stored as digests, per-account lockout, and sign-out revocation.
 - A password alone now grants no capability. The session exists but is unauthorized until the second factor succeeds, so `/api/analyst/*` answers 403 rather than 200.

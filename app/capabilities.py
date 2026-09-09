@@ -1,9 +1,13 @@
 """Versioned implementation manifest. This describes coverage, never safety."""
 BUILD_VERSION = "0.2.0"
 
-def manifest() -> dict:
+def manifest(demo: bool = False) -> dict:
     return {
-        "version": BUILD_VERSION, "mode": "local_prototype",
+        "version": BUILD_VERSION,
+        "mode": "public_demo" if demo else "local_prototype",
+        # A hosted demo refuses report intake in the server, so no real citizen
+        # evidence can reach it. That is Gate A on a public URL, not Gate C.
+        "report_intake": not demo,
         "production_ready": False, "external_requests": False,
         "working": ["passive_message_url_rules", "qr_image_decode",
                     "on_device_image_redaction", "consented_minimized_reports",

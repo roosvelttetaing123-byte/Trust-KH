@@ -238,7 +238,10 @@ export const messages = {
     mfaPending: 'នៅសល់ជំហានផ្ទៀងផ្ទាត់មួយទៀត។',
     noAccess: 'តួនាទីរបស់អ្នកមិនអនុញ្ញាតឱ្យមើលទំព័រនេះទេ។',
     signedOut: 'បានចាកចេញរួចរាល់។',
-    auditEmpty: 'មិនទាន់មានព្រឹត្តិការណ៍សវនកម្មទេ។'
+    auditEmpty: 'មិនទាន់មានព្រឹត្តិការណ៍សវនកម្មទេ។',
+    demoBadge: 'ការបង្ហាញសាធារណៈ',
+    demoNotice: 'ការបង្ហាញសាធារណៈ។ មិនមានការទទួលរបាយការណ៍ទេ — គ្មានអ្វីដែលអ្នកសរសេរត្រូវបានរក្សាទុកឡើយ។',
+    demoReportsOff: 'នៅក្នុងការបង្ហាញនេះ ការរាយការណ៍ត្រូវបានបិទនៅម៉ាស៊ីនមេ។ គ្មានព័ត៌មានណាមួយត្រូវបានរក្សាទុកទេ។ សម្រាប់បណ្ដឹងផ្លូវការ សូមប្រើប្រព័ន្ធរបស់នគរបាល។'
   },
   en: {
     pasteFirst: 'Paste something to check first.',
@@ -274,7 +277,10 @@ export const messages = {
     mfaPending: 'One verification step remains.',
     noAccess: 'Your role does not give access to this view.',
     signedOut: 'Signed out.',
-    auditEmpty: 'No audit events yet.'
+    auditEmpty: 'No audit events yet.',
+    demoBadge: 'Public demonstration',
+    demoNotice: 'Public demonstration. Report intake is switched off — nothing you type is stored.',
+    demoReportsOff: 'Reporting is disabled in the server for this demonstration, so nothing is stored. To file a real complaint, use the official police channel.'
   },
   zh: {
     pasteFirst: '请先粘贴需要检查的内容。',
@@ -310,6 +316,9 @@ export const messages = {
     mfaPending: '还差一步验证。',
     noAccess: '你的角色无权查看此视图。',
     signedOut: '已退出登录。',
-    auditEmpty: '暂无审计事件。'
+    auditEmpty: '暂无审计事件。',
+    demoBadge: '公开演示',
+    demoNotice: '公开演示。已关闭举报接收 — 你输入的任何内容都不会被保存。',
+    demoReportsOff: '本次演示已在服务器端关闭举报功能，不会保存任何内容。如需正式报案，请使用警方官方渠道。'
   }
 };

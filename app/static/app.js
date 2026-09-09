@@ -4,7 +4,7 @@ const $$=s=>[...document.querySelectorAll(s)];
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let lang='km';
 try{const saved=localStorage.getItem('trust-language');if(LANGS.includes(saved))lang=saved;}catch{}
-let kind='message',last=null,receipt=null,imageLoaded=false,toastTimer;
+let kind='message',last=null,receipt=null,imageLoaded=false,toastTimer,demoMode=false;
 // Khmer is the base language and lives inline in index.html; other languages come from `dict`.
 const original=new Map($$('[data-i18n]').map(el=>[el,el.innerHTML]));
 const originalLabels=new Map($$('[data-i18n-label]').map(el=>[el,el.getAttribute('aria-label')]));
@@ -16,6 +16,13 @@ function translate(){
  for(const [el,base] of originalLabels)el.setAttribute('aria-label',t(el.dataset.i18nLabel)??base);
  $('#check-text').placeholder=t('checkPlaceholder')??'បិទភ្ជាប់សារ ឬតំណនៅទីនេះ។ សូមលុប OTP លេខសម្ងាត់ និងព័ត៌មានផ្ទាល់ខ្លួនជាមុន។';
  $('#language').value=lang;
+ if(demoMode){
+  // The server refuses report intake in demo mode; say so instead of leaving the
+  // ordinary prototype notice, which would understate what is switched off.
+  $('[data-i18n="prototype"]').textContent=msg().demoBadge;
+  $('[data-i18n="prototypeNote"]').textContent=msg().demoNotice;
+  $('.withdraw').classList.add('hidden');
+ }
  renderAuth();
  if(last)renderResult();
 }
@@ -67,10 +74,10 @@ function renderResult(){
  <div class="result-actions"><button class="button secondary" id="export-summary">${esc(c.export)}</button><button class="button quiet" id="forget-result">${esc(c.forgot)}</button></div>
  <a class="field-note" href="https://hotline.police.gov.kh/" target="_blank" rel="noopener noreferrer">${esc(c.official)}</a>
  <p class="field-note">${esc(c.checked)} ${esc(r.rule_version)}</p>
- <details class="report-form"><summary>${esc(c.report)}</summary><div class="report-fields"><select id="report-category" aria-label="${esc(c.categoryLabel)}">${['impersonation','investment','shopping','job','other'].map((v,i)=>`<option value="${v}">${esc(c.categories[i])}</option>`).join('')}</select><select id="report-channel" aria-label="${esc(c.channelLabel)}">${['telegram','facebook','messenger','sms','web','other'].map((v,i)=>`<option value="${v}">${esc(c.channels[i])}</option>`).join('')}</select></div><label class="checkbox"><input type="checkbox" id="report-consent"><span>${esc(c.consent)}</span></label><button class="button primary" id="submit-report">${esc(c.submit)}</button><div id="report-receipt"></div></details>`;
+ ${demoMode?`<p class="field-note demo-note">${esc(msg().demoReportsOff)}</p>`:`<details class="report-form"><summary>${esc(c.report)}</summary><div class="report-fields"><select id="report-category" aria-label="${esc(c.categoryLabel)}">${['impersonation','investment','shopping','job','other'].map((v,i)=>`<option value="${v}">${esc(c.categories[i])}</option>`).join('')}</select><select id="report-channel" aria-label="${esc(c.channelLabel)}">${['telegram','facebook','messenger','sms','web','other'].map((v,i)=>`<option value="${v}">${esc(c.channels[i])}</option>`).join('')}</select></div><label class="checkbox"><input type="checkbox" id="report-consent"><span>${esc(c.consent)}</span></label><button class="button primary" id="submit-report">${esc(c.submit)}</button><div id="report-receipt"></div></details>`}`;
  $('#forget-result').addEventListener('click',clearCheck);
  $('#export-summary').addEventListener('click',async()=>{try{const response=await api('/api/scans/'+encodeURIComponent(r.scan_id)+'/export',{token:r.access_token});saveBlob(await response.blob(),'trust-kh-review-summary.zip');}catch(error){toast(error.message);}});
- $('#submit-report').addEventListener('click',async()=>{
+ $('#submit-report')?.addEventListener('click',async()=>{
   if(!$('#report-consent').checked){toast(msg().consentFirst);return;}
   const button=$('#submit-report');button.disabled=true;
   try{const response=await api('/api/reports',{method:'POST',token:r.access_token,body:{scan_id:r.scan_id,consent:true,consent_version:'2026-09-09.v1',category:$('#report-category').value,channel:$('#report-channel').value}});receipt=await response.json();showReceipt();}catch(error){toast(error.message);button.disabled=false;}
@@ -155,3 +162,8 @@ function online(){ $('#offline').classList.toggle('hidden',navigator.onLine);$('
 window.addEventListener('online',online);window.addEventListener('offline',online);
 if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});
 translate();navigate(location.hash.slice(1));online();
+// The server is the authority on whether report intake is enabled; the interface
+// only reflects it.
+fetch('/api/capabilities',{cache:'no-store'}).then(r=>r.json()).then(caps=>{
+ if(caps.report_intake===false){demoMode=true;translate();}
+}).catch(()=>{});

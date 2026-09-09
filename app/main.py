@@ -16,7 +16,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from .accounts import Directory, LOCKOUT_SECONDS
-from .config import Settings
+from .config import Settings, is_loopback_origin
 from .capabilities import BUILD_VERSION, manifest
 from .engine import analyze, public_result
 from .qr import decode_image, MAX_IMAGE_BYTES
@@ -109,8 +109,7 @@ def create_app(settings: Settings | None = None):
     @app.middleware('http')
     async def security(request:Request,call_next):
         origin=request.headers.get('origin')
-        allowed={'http://127.0.0.1:8000','http://localhost:8000','http://testserver'}
-        if origin and origin not in allowed:
+        if origin and origin not in set(settings.allowed_origins) and not is_loopback_origin(origin):
             response=JSONResponse({'detail':'Origin is not allowed in this local starter.'},status_code=403)
         elif request.url.path.startswith('/api/') and not limiter.allow(hashlib.sha256((settings.hmac_key+(request.client.host if request.client else 'unknown')).encode()).hexdigest()):
             response=JSONResponse({'detail':'Too many requests. Retry in one minute.'},status_code=429,headers={'Retry-After':'60'})
@@ -121,6 +120,9 @@ def create_app(settings: Settings | None = None):
         response.headers['X-Frame-Options']='DENY'
         response.headers['Permissions-Policy']='camera=(),microphone=(),geolocation=()'
         response.headers['Content-Security-Policy']="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' blob: data:; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'"
+        if settings.demo:
+            # The demo is served over TLS by the host; do not let it be downgraded.
+            response.headers['Strict-Transport-Security']='max-age=31536000; includeSubDomains'
         if request.url.path.startswith('/api/'):
             response.headers['Cache-Control']='no-store'
         return response
@@ -175,11 +177,12 @@ def create_app(settings: Settings | None = None):
 
     @app.get('/api/capabilities')
     def capabilities():
-        return manifest()
+        return manifest(demo=settings.demo)
 
     @app.get('/api/health')
     def health():
-        return {'status':'ok','mode':'local_starter','live_reputation':False,'external_requests':False}
+        return {'status':'ok','mode':'public_demo' if settings.demo else 'local_starter',
+                'report_intake':not settings.demo,'live_reputation':False,'external_requests':False}
 
     @app.post('/api/scans',status_code=201)
     def scan(request:ScanRequest):
@@ -213,6 +216,12 @@ def create_app(settings: Settings | None = None):
 
     @app.post('/api/reports',status_code=201)
     def report(request:ReportRequest,authorization:str|None=Header(default=None)):
+        if settings.demo:
+            # Refused in the server, not hidden in the interface: a hosted demo must be
+            # incapable of collecting real citizen evidence, which needs Gate C.
+            raise HTTPException(403,'This is a public demonstration. Reports are not collected here, '
+                                    'so nothing you write is stored. Use the official police reporting '
+                                    'channel to file a real complaint.')
         result=scans.get(request.scan_id,bearer(authorization))
         # Citizens are anonymous, so consented reports land in the pilot organization's
         # intake queue. Routing to a chosen organization needs the partner agreements
