@@ -132,6 +132,21 @@ def test_foreign_origin_blocked(client):
     r=client.post('/api/scans',json={'kind':'message','text':'Hello'},headers={'Origin':'https://unrelated.test'})
     assert r.status_code==403
 
+def test_static_assets_ignore_origin(client):
+    """A wrong TRUST_ORIGIN must not disable the app.
+
+    Module scripts and webfonts are fetched in CORS mode and send Origin even
+    same-origin. Blocking GET on Origin therefore returned 403 for /app.js while
+    /style.css still loaded, so a misconfigured deploy rendered a correct-looking
+    page with no working JavaScript at all.
+    """
+    foreign={'Origin':'https://wrong-origin.test'}
+    for path in ('/','/app.js','/i18n.js','/style.css','/fonts/kantumruy-pro-khmer.woff2'):
+        assert client.get(path,headers=foreign).status_code==200, f'{path} must load regardless of Origin'
+    # Reads stay open; only state-changing requests are origin-checked.
+    assert client.get('/api/health',headers=foreign).status_code==200
+    assert client.post('/api/scans',json={'kind':'message','text':'Hi'},headers=foreign).status_code==403
+
 def test_validation_does_not_echo_sensitive_input(client):
     r=client.post('/api/scans',json={'kind':'other','text':'MY-SECRET-OTP-112233'})
     assert r.status_code==422

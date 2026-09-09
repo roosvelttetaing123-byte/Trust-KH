@@ -109,8 +109,15 @@ def create_app(settings: Settings | None = None):
     @app.middleware('http')
     async def security(request:Request,call_next):
         origin=request.headers.get('origin')
-        if origin and origin not in set(settings.allowed_origins) and not is_loopback_origin(origin):
-            response=JSONResponse({'detail':'Origin is not allowed in this local starter.'},status_code=403)
+        # Enforce Origin only on state-changing requests, which is all a CSRF-style
+        # control protects. Module scripts and webfonts are fetched in CORS mode and
+        # send Origin even same-origin, so checking it on GET meant one wrong
+        # TRUST_ORIGIN returned 403 for /app.js and the fonts — the stylesheet still
+        # loaded, so the page looked correct while the entire application was inert.
+        # A misconfigured deployment must fail loudly, not silently.
+        unsafe=request.method in {'POST','PUT','PATCH','DELETE'}
+        if unsafe and origin and origin not in set(settings.allowed_origins) and not is_loopback_origin(origin):
+            response=JSONResponse({'detail':'Origin is not allowed for this request.'},status_code=403)
         elif request.url.path.startswith('/api/') and not limiter.allow(hashlib.sha256((settings.hmac_key+(request.client.host if request.client else 'unknown')).encode()).hexdigest()):
             response=JSONResponse({'detail':'Too many requests. Retry in one minute.'},status_code=429,headers={'Retry-After':'60'})
         else:
