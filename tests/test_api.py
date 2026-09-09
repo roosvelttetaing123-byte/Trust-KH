@@ -21,7 +21,7 @@ def test_health_and_frontend(client):
     assert client.get('/api/health').json()['live_reputation'] is False
     response=client.get('/')
     assert response.status_code==200
-    assert 'Check before you trust' in response.text
+    assert 'ពិនិត្យមុននឹងជឿ' in response.text
     assert "frame-ancestors 'none'" in response.headers['content-security-policy']
 
 def test_result_requires_secret_capability(client):

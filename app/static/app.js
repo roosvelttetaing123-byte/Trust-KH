@@ -1,27 +1,40 @@
-import {km,resultCopy} from './i18n.js';
+import {LANGS, dict, resultCopy, messages} from './i18n.js';
 const $=s=>document.querySelector(s);
 const $$=s=>[...document.querySelectorAll(s)];
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let lang='en';
-try{lang=localStorage.getItem('trust-language')==='km'?'km':'en';}catch{}
+let lang='km';
+try{const saved=localStorage.getItem('trust-language');if(LANGS.includes(saved))lang=saved;}catch{}
 let kind='message',last=null,receipt=null,imageLoaded=false,toastTimer;
+// Khmer is the base language and lives inline in index.html; other languages come from `dict`.
 const original=new Map($$('[data-i18n]').map(el=>[el,el.innerHTML]));
+const originalLabels=new Map($$('[data-i18n-label]').map(el=>[el,el.getAttribute('aria-label')]));
+const t=key=>(lang==='km'?null:dict[lang]?.[key])??null;
+const msg=()=>messages[lang];
 function translate(){
  document.documentElement.lang=lang;
- for(const [el,en]of original)el.innerHTML=lang==='km'?(km[el.dataset.i18n]||en):en; // Only trusted static dictionaries.
- $('#language').textContent=lang==='en'?'ខ្មែរ':'EN';
- $('#check-text').placeholder=lang==='km'?'បិទភ្ជាប់សារ ឬតំណ។ សូមលុប OTP លេខសម្ងាត់ និងព័ត៌មានផ្ទាល់ខ្លួនជាមុន។':'Paste a message or link here. Remove passwords, OTPs, account balances and personal details first.';
+ for(const [el,base] of original)el.innerHTML=t(el.dataset.i18n)??base; // Only trusted static dictionaries.
+ for(const [el,base] of originalLabels)el.setAttribute('aria-label',t(el.dataset.i18nLabel)??base);
+ $('#check-text').placeholder=t('checkPlaceholder')??'បិទភ្ជាប់សារ ឬតំណនៅទីនេះ។ សូមលុប OTP លេខសម្ងាត់ និងព័ត៌មានផ្ទាល់ខ្លួនជាមុន។';
+ $('#analyst-key').placeholder=t('analystKeyPlaceholder')??'TRUST_ADMIN_KEY ពី .env មូលដ្ឋាន';
+ $('#pulse-key').placeholder=t('pulseKeyPlaceholder')??'TRUST_PULSE_KEY ពី .env មូលដ្ឋាន';
+ $('#language').value=lang;
  if(last)renderResult();
 }
-$('#language').addEventListener('click',()=>{lang=lang==='en'?'km':'en';try{localStorage.setItem('trust-language',lang);}catch{}translate();});
+$('#language').addEventListener('change',event=>{
+ const value=event.target.value;
+ if(!LANGS.includes(value))return;
+ lang=value;
+ try{localStorage.setItem('trust-language',lang);}catch{}
+ translate();
+});
 function toast(message){$('#toast').textContent=message;$('#toast').classList.remove('hidden');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.add('hidden'),6500);}
 async function api(path,{method='GET',body,token,headers={}}={}){
  const init={method,headers:{...headers},cache:'no-store'};
  if(token)init.headers.Authorization='Bearer '+token;
  if(body!==undefined){if(body instanceof Blob)init.body=body;else{init.headers['Content-Type']='application/json';init.body=JSON.stringify(body);}}
  let response;
- try{response=await fetch(path,init);}catch{throw Error('Connection unavailable. No assessment or report was completed.');}
- if(!response.ok){let message='Request failed.';try{message=(await response.json()).detail||message;}catch{}throw Error(message);}
+ try{response=await fetch(path,init);}catch{throw Error(msg().connection);}
+ if(!response.ok){let message=msg().requestFailed;try{message=(await response.json()).detail||message;}catch{}throw Error(message);}
  return response;
 }
 function saveBlob(blob,name){const link=document.createElement('a'),url=URL.createObjectURL(blob);link.href=url;link.download=name;link.click();setTimeout(()=>URL.revokeObjectURL(url),30000);}
@@ -36,11 +49,11 @@ async function clearCheck(){
  const previous=last;last=null;receipt=null;$('#check-text').value='';$('#result-content').innerHTML='';$('#result-content').classList.add('hidden');$('#result-empty').classList.remove('hidden');
  $('#image-file').value='';$('#canvas-wrap').classList.add('hidden');imageLoaded=false;
  const canvas=$('#image-canvas');canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);canvas.width=1;canvas.height=1;
- if(previous){try{await api('/api/scans/'+encodeURIComponent(previous.scan_id),{method:'DELETE',token:previous.access_token});}catch{toast('The local view was cleared. An unreachable server copy expires automatically after 15 minutes.');}}
+ if(previous){try{await api('/api/scans/'+encodeURIComponent(previous.scan_id),{method:'DELETE',token:previous.access_token});}catch{toast(msg().clearedLocal);}}
 }
 $('#clear-check').addEventListener('click',clearCheck);
 $('#run-check').addEventListener('click',async()=>{
- const text=$('#check-text').value.trim();if(!text){toast('Paste something to check first.');return;}
+ const text=$('#check-text').value.trim();if(!text){toast(msg().pasteFirst);return;}
  const button=$('#run-check');button.disabled=true;
  try{const response=await api('/api/scans',{method:'POST',body:{kind,text}});last=await response.json();receipt=null;renderResult();if(window.innerWidth<651)$('#result-content').scrollIntoView({behavior:'smooth',block:'start'});}catch(error){toast(error.message);}finally{button.disabled=false;}
 });
@@ -55,39 +68,39 @@ function renderResult(){
  <div class="result-actions"><button class="button secondary" id="export-summary">${esc(c.export)}</button><button class="button quiet" id="forget-result">${esc(c.forgot)}</button></div>
  <a class="field-note" href="https://hotline.police.gov.kh/" target="_blank" rel="noopener noreferrer">${esc(c.official)}</a>
  <p class="field-note">${esc(c.checked)} ${esc(r.rule_version)}</p>
- <details class="report-form"><summary>${esc(c.report)}</summary><div class="report-fields"><select id="report-category" aria-label="Scam category">${['impersonation','investment','shopping','job','other'].map((v,i)=>`<option value="${v}">${esc(c.categories[i])}</option>`).join('')}</select><select id="report-channel" aria-label="Message channel">${['telegram','facebook','messenger','sms','web','other'].map((v,i)=>`<option value="${v}">${esc(c.channels[i])}</option>`).join('')}</select></div><label class="checkbox"><input type="checkbox" id="report-consent"><span>${esc(c.consent)}</span></label><button class="button primary" id="submit-report">${esc(c.submit)}</button><div id="report-receipt"></div></details>`;
+ <details class="report-form"><summary>${esc(c.report)}</summary><div class="report-fields"><select id="report-category" aria-label="${esc(c.categoryLabel)}">${['impersonation','investment','shopping','job','other'].map((v,i)=>`<option value="${v}">${esc(c.categories[i])}</option>`).join('')}</select><select id="report-channel" aria-label="${esc(c.channelLabel)}">${['telegram','facebook','messenger','sms','web','other'].map((v,i)=>`<option value="${v}">${esc(c.channels[i])}</option>`).join('')}</select></div><label class="checkbox"><input type="checkbox" id="report-consent"><span>${esc(c.consent)}</span></label><button class="button primary" id="submit-report">${esc(c.submit)}</button><div id="report-receipt"></div></details>`;
  $('#forget-result').addEventListener('click',clearCheck);
  $('#export-summary').addEventListener('click',async()=>{try{const response=await api('/api/scans/'+encodeURIComponent(r.scan_id)+'/export',{token:r.access_token});saveBlob(await response.blob(),'trust-kh-review-summary.zip');}catch(error){toast(error.message);}});
  $('#submit-report').addEventListener('click',async()=>{
-  if(!$('#report-consent').checked){toast('Please review and explicitly agree to the report consent.');return;}
+  if(!$('#report-consent').checked){toast(msg().consentFirst);return;}
   const button=$('#submit-report');button.disabled=true;
   try{const response=await api('/api/reports',{method:'POST',token:r.access_token,body:{scan_id:r.scan_id,consent:true,consent_version:'2026-09-09.v1',category:$('#report-category').value,channel:$('#report-channel').value}});receipt=await response.json();showReceipt();}catch(error){toast(error.message);button.disabled=false;}
  });
  if(receipt)showReceipt();
 }
 function showReceipt(){const c=resultCopy[lang];$('#submit-report').disabled=true;$('#report-receipt').innerHTML=`<div class="success">${esc(c.success)}<div class="button-row"><button class="button secondary" id="save-receipt">${esc(c.receipt)}</button></div><p class="field-note">${esc(c.receiptHint)}</p></div>`;$('#save-receipt').addEventListener('click',()=>saveBlob(new Blob([JSON.stringify(receipt,null,2)],{type:'application/json'}),'trust-kh-private-receipt.json'));}
-$('#withdraw-report').addEventListener('click',async()=>{const file=$('#receipt-file').files[0];if(!file||file.size>10000){toast('Choose a valid small receipt JSON file.');return;}try{const r=JSON.parse(await file.text());if(!/^[a-f0-9]{32}$/.test(r.report_id)||typeof r.deletion_token!=='string'||r.deletion_token.length>128)throw Error('Invalid receipt.');await api('/api/reports/'+r.report_id,{method:'DELETE',token:r.deletion_token});toast('Report and related observations were deleted.');$('#receipt-file').value='';}catch(error){toast(error.message);}});
+$('#withdraw-report').addEventListener('click',async()=>{const file=$('#receipt-file').files[0];if(!file||file.size>10000){toast(msg().receiptInvalid);return;}try{const r=JSON.parse(await file.text());if(!/^[a-f0-9]{32}$/.test(r.report_id)||typeof r.deletion_token!=='string'||r.deletion_token.length>128)throw Error(msg().receiptInvalid);await api('/api/reports/'+r.report_id,{method:'DELETE',token:r.deletion_token});toast(msg().withdrawn);$('#receipt-file').value='';}catch(error){toast(error.message);}});
 const canvas=$('#image-canvas'),ctx=canvas.getContext('2d');let start=null;
-$('#image-file').addEventListener('change',async()=>{const file=$('#image-file').files[0];if(!file)return;if(!['image/png','image/jpeg'].includes(file.type)||file.size>2*1024*1024){toast('Use PNG/JPEG up to 2 MiB.');return;}try{const bitmap=await createImageBitmap(file);if(bitmap.width*bitmap.height>6000000){bitmap.close();throw Error('Resize the image to at most 6 megapixels.');}const scale=Math.min(1,1200/Math.max(bitmap.width,bitmap.height));canvas.width=Math.round(bitmap.width*scale);canvas.height=Math.round(bitmap.height*scale);ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close();imageLoaded=true;$('#canvas-wrap').classList.remove('hidden');}catch(error){toast(error.message);}});
+$('#image-file').addEventListener('change',async()=>{const file=$('#image-file').files[0];if(!file)return;if(!['image/png','image/jpeg'].includes(file.type)||file.size>2*1024*1024){toast(msg().imageType);return;}try{const bitmap=await createImageBitmap(file);if(bitmap.width*bitmap.height>6000000){bitmap.close();throw Error(msg().imagePixels);}const scale=Math.min(1,1200/Math.max(bitmap.width,bitmap.height));canvas.width=Math.round(bitmap.width*scale);canvas.height=Math.round(bitmap.height*scale);ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close();imageLoaded=true;$('#canvas-wrap').classList.remove('hidden');}catch(error){toast(error.message);}});
 function point(event){const rect=canvas.getBoundingClientRect();return{x:(event.clientX-rect.left)*canvas.width/rect.width,y:(event.clientY-rect.top)*canvas.height/rect.height};}
 canvas.addEventListener('pointerdown',event=>{if(imageLoaded){start=point(event);canvas.setPointerCapture(event.pointerId);}});
 canvas.addEventListener('pointerup',event=>{if(!start)return;const end=point(event);ctx.fillStyle='#000';ctx.fillRect(Math.min(start.x,end.x),Math.min(start.y,end.y),Math.abs(end.x-start.x),Math.abs(end.y-start.y));start=null;});
 canvas.addEventListener('pointercancel',()=>{start=null;});
-const canvasBlob=()=>new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(Error('Could not encode image.')),'image/png'));
+const canvasBlob=()=>new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(Error(msg().imageEncode)),'image/png'));
 $('#save-image').addEventListener('click',async()=>{try{saveBlob(await canvasBlob(),'trust-kh-redacted-copy.png');}catch(error){toast(error.message);}});
-$('#decode-qr').addEventListener('click',async()=>{const button=$('#decode-qr');button.disabled=true;try{const blob=await canvasBlob();if(blob.size>2*1024*1024)throw Error('Redacted image exceeds 2 MiB. Resize or crop it first.');const response=await api('/api/qr/decode',{method:'POST',body:blob,headers:{'Content-Type':'image/png'}});const result=await response.json();setKind('qr');$('#check-text').value=result.text;toast('QR decoded, not verified. Inspect the text, then choose Check.');}catch(error){toast(error.message);}finally{button.disabled=false;}});
+$('#decode-qr').addEventListener('click',async()=>{const button=$('#decode-qr');button.disabled=true;try{const blob=await canvasBlob();if(blob.size>2*1024*1024)throw Error(msg().imageTooBig);const response=await api('/api/qr/decode',{method:'POST',body:blob,headers:{'Content-Type':'image/png'}});const result=await response.json();setKind('qr');$('#check-text').value=result.text;toast(msg().qrDecoded);}catch(error){toast(error.message);}finally{button.disabled=false;}});
 async function loadAnalyst(){
- const token=$('#analyst-key').value.trim();
+ const token=$('#analyst-key').value.trim(),m=msg();
  try{const [a,b]=await Promise.all([api('/api/analyst/reports',{token}),api('/api/analyst/graph',{token})]);const {reports}=await a.json(),graph=await b.json();$('#analyst-content').classList.remove('hidden');
-  $('#report-list').innerHTML=reports.length?reports.map(r=>`<div class="report-item"><h3>${esc(r.category)} <span class="status">${esc(r.status)}</span></h3><p>${r.is_demo?'SYNTHETIC DEMO · ':''}${esc(r.channel)} · ${esc(r.id.slice(0,8))}</p><div class="chip-row">${r.indicators.map(i=>`<span class="chip">${esc(i.display)}</span>`).join('')}</div><p>Rule findings: ${esc(r.signal_codes.join(', ')||'none')}. No original message retained.</p><div class="button-row"><button class="button secondary" data-review="accepted" data-id="${esc(r.id)}">Accept relevance</button><button class="button quiet" data-review="rejected" data-id="${esc(r.id)}">Reject / insufficient</button></div></div>`).join(''):'<p class="field-note">No reports yet. Submit a separate opt-in report from a check, or run scripts/seed_demo.py for labelled synthetic data.</p>';
+  $('#report-list').innerHTML=reports.length?reports.map(r=>`<div class="report-item"><h3>${esc(r.category)} <span class="status">${esc(r.status)}</span></h3><p>${r.is_demo?esc(m.syntheticData)+' · ':''}${esc(r.channel)} · ${esc(r.id.slice(0,8))}</p><div class="chip-row">${r.indicators.map(i=>`<span class="chip">${esc(i.display)}</span>`).join('')}</div><p>${esc(m.ruleFindings)}: ${esc(r.signal_codes.join(', ')||m.none)}. ${esc(m.noOriginal)}</p><div class="button-row"><button class="button secondary" data-review="accepted" data-id="${esc(r.id)}">${esc(m.accept)}</button><button class="button quiet" data-review="rejected" data-id="${esc(r.id)}">${esc(m.reject)}</button></div></div>`).join(''):`<p class="field-note">${esc(m.noReports)}</p>`;
   $$('[data-review]').forEach(button=>button.addEventListener('click',async()=>{try{await api('/api/analyst/reports/'+encodeURIComponent(button.dataset.id),{method:'PATCH',token,body:{status:button.dataset.review,reason:button.dataset.review==='accepted'?'relevant_evidence':'insufficient_evidence'}});await loadAnalyst();}catch(error){toast(error.message);}}));
   const nodeMap=Object.fromEntries(graph.nodes.map(n=>[n.id,n]));
-  $('#graph').innerHTML=graph.nodes.length?`<div class="graph-nodes">${graph.nodes.map(n=>`<div class="graph-node"><strong>${esc(n.label)}</strong><small>${esc(n.kind)} · ${n.reports} reviewed report(s) ${n.is_demo?'· DEMO':''}</small></div>`).join('')}</div>${graph.edges.map(e=>`<div class="edge">${esc(nodeMap[e.source].label)} ↔ ${esc(nodeMap[e.target].label)}<br>${e.reports} co-occurrence(s), not attribution</div>`).join('')}`:'<p class="field-note">No reviewed associations. Approve relevant reports before a connection can appear.</p>';
+  $('#graph').innerHTML=graph.nodes.length?`<div class="graph-nodes">${graph.nodes.map(n=>`<div class="graph-node"><strong>${esc(n.label)}</strong><small>${esc(n.kind)} · ${esc(n.reports)} ${esc(m.reviewedReports)} ${n.is_demo?'· DEMO':''}</small></div>`).join('')}</div>${graph.edges.map(e=>`<div class="edge">${esc(nodeMap[e.source].label)} ↔ ${esc(nodeMap[e.target].label)}<br>${esc(e.reports)} ${esc(m.coOccurrence)}</div>`).join('')}`:`<p class="field-note">${esc(m.noAssoc)}</p>`;
  }catch(error){toast(error.message);}
 }
 $('#load-analyst').addEventListener('click',loadAnalyst);
 $('#lock-analyst').addEventListener('click',()=>{$('#analyst-key').value='';$('#analyst-content').classList.add('hidden');$('#report-list').innerHTML='';$('#graph').innerHTML='';});
-$('#load-pulse').addEventListener('click',async()=>{try{const response=await api($('#pulse-demo').checked?'/api/pulse/demo':'/api/pulse',{token:$('#pulse-key').value.trim()});const data=await response.json();$('#pulse-content').innerHTML=`<article class="panel pulse-card"><div class="eyebrow">${data.dataset==='synthetic_demo'?'SYNTHETIC DEMONSTRATION DATA':'CONSENTED, REVIEWED REPORTS ONLY'}</div><h2>Signals, with boundaries.</h2><div class="metric">${data.reviewed_reports===null?'Suppressed':esc(data.reviewed_reports)}</div><p class="field-note">Reviewed submitted reports — not unique victims or verified incidents.</p>${data.categories.map(c=>`<div class="bar-row"><span>${esc(c.category)}</span><strong>${esc(c.reports)} reports</strong></div>`).join('')||'<p class="field-note">No category meets the minimum publication threshold.</p>'}<p class="field-note">Minimum cell size: ${data.minimum_cell_size}. ${data.small_cells_suppressed?'Small cells and the total were withheld to avoid subtraction disclosure.':''}</p><p class="field-note">${esc(data.notice)}</p></article>`;}catch(error){toast(error.message);}});
+$('#load-pulse').addEventListener('click',async()=>{const m=msg();try{const response=await api($('#pulse-demo').checked?'/api/pulse/demo':'/api/pulse',{token:$('#pulse-key').value.trim()});const data=await response.json();$('#pulse-content').innerHTML=`<article class="panel pulse-card"><div class="eyebrow">${esc(data.dataset==='synthetic_demo'?m.syntheticData:m.consentedData)}</div><h2>${esc(m.pulseTitle)}</h2><div class="metric">${data.reviewed_reports===null?esc(m.suppressed):esc(data.reviewed_reports)}</div><p class="field-note">${esc(m.pulseMetricNote)}</p>${data.categories.map(c=>`<div class="bar-row"><span>${esc(c.category)}</span><strong>${esc(c.reports)} ${esc(m.reports)}</strong></div>`).join('')||`<p class="field-note">${esc(m.noThreshold)}</p>`}<p class="field-note">${esc(m.minCell)}: ${esc(data.minimum_cell_size)}. ${data.small_cells_suppressed?esc(m.smallCells):''}</p><p class="field-note">${esc(data.notice)}</p></article>`;}catch(error){toast(error.message);}});
 $('#lock-pulse').addEventListener('click',()=>{$('#pulse-key').value='';$('#pulse-content').innerHTML='';});
 function online(){ $('#offline').classList.toggle('hidden',navigator.onLine);$('#run-check').disabled=!navigator.onLine; }
 window.addEventListener('online',online);window.addEventListener('offline',online);

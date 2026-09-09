@@ -12,7 +12,7 @@ html=(root/'app/static/index.html').read_text()
 html=re.sub(r'<link[^>]+>', '', html)
 html=html.replace('</head>','<style>'+(root/'app/static/style.css').read_text()+'</style></head>')
 html=html.replace('<script type="module" src="/app.js"></script>','')
-js=(root/'app/static/i18n.js').read_text().replace('export const','const')+'\n'+(root/'app/static/app.js').read_text().replace("import {km,resultCopy} from './i18n.js';",'')
+js=(root/'app/static/i18n.js').read_text().replace('export const','const')+'\n'+(root/'app/static/app.js').read_text().replace("import {LANGS, dict, resultCopy, messages} from './i18n.js';",'')
 js=re.sub(r"if\('serviceWorker'in navigator\)navigator.serviceWorker.register\('/sw.js'\).catch\(\(\)=>\{\}\);",'',js)
 with tempfile.TemporaryDirectory() as td, TestClient(create_app(Settings(td+'/db.sqlite','a'*40,'p'*40,'h'*40,rate_limit=1000))) as client, sync_playwright() as p:
     def bridge(req):
@@ -27,6 +27,8 @@ with tempfile.TemporaryDirectory() as td, TestClient(create_app(Settings(td+'/db
     page.add_script_tag(content="""window.fetch=async (path, init={})=>{if(!path.startsWith('/api/'))throw Error('Unexpected path');const raw=init.body?await new Blob([init.body]).arrayBuffer():new ArrayBuffer(0);const body=btoa(String.fromCharCode(...new Uint8Array(raw)));const r=await window.__testApi({path,method:init.method||'GET',headers:init.headers||{},body});const bytes=Uint8Array.from(atob(r.body),x=>x.charCodeAt(0));return new Response(r.status===204?null:bytes,{status:r.status,headers:r.headers});};""")
     page.add_script_tag(content=js)
     page.screenshot(path=str(out/'desktop-home.png'),full_page=True)
+    assert page.locator('html').get_attribute('lang')=='km', 'Khmer is the base language'
+    page.select_option('#language','en')  # English assertions below need the English dictionary.
     page.click('[data-example="unknown"]'); page.click('#run-check')
     page.get_by_text('Unknown — not verified',exact=True).wait_for()
     page.click('[data-example="otp"]');page.click('#run-check')
@@ -41,11 +43,16 @@ with tempfile.TemporaryDirectory() as td, TestClient(create_app(Settings(td+'/db
     page.click('[data-page="pulse"]');page.fill('#pulse-key','p'*40);page.click('#load-pulse')
     page.get_by_text('Signals, with boundaries.',exact=True).wait_for();page.fill('#pulse-key','')
     page.screenshot(path=str(out/'pulse.png'),full_page=True)
-    page.click('[data-page="check"]');page.click('#language'); assert page.locator('html').get_attribute('lang')=='km'
+    page.click('[data-page="check"]')
+    page.select_option('#language','km'); assert page.locator('html').get_attribute('lang')=='km'
+    page.get_by_text('មានសញ្ញាព្រមានខ្លាំង',exact=True).wait_for()  # result re-renders in the new language
     page.screenshot(path=str(out/'khmer.png'),full_page=True)
-    page.click('#language');page.set_viewport_size({'width':390,'height':844})
+    page.select_option('#language','zh'); assert page.locator('html').get_attribute('lang')=='zh'
+    page.get_by_text('存在明显警示信号',exact=True).wait_for()
+    page.screenshot(path=str(out/'chinese.png'),full_page=True)
+    page.select_option('#language','en');page.set_viewport_size({'width':390,'height':844})
     page.screenshot(path=str(out/'mobile-result.png'),full_page=True)
     assert page.evaluate('document.documentElement.scrollWidth <= window.innerWidth'), 'mobile overflow'
     assert not errors, errors
     browser.close()
-print(json.dumps({'ui_method':'offline DOM with in-process real FastAPI handler adapter','ui_flows':['unknown check','warning check','consented report','analyst review','graph view','analyst lock','aggregate role','Khmer toggle','390px overflow check'],'javascript_errors':errors,'http_navigation':'NOT validated by this adapter; run browser_smoke.py on an unrestricted local development browser','service_worker':'NOT validated by this adapter','screenshots':str(out)},indent=2))
+print(json.dumps({'ui_method':'offline DOM with in-process real FastAPI handler adapter','ui_flows':['unknown check','warning check','consented report','analyst review','graph view','analyst lock','aggregate role','Khmer/English/Chinese switching','390px overflow check'],'javascript_errors':errors,'http_navigation':'NOT validated by this adapter; run browser_smoke.py on an unrestricted local development browser','service_worker':'NOT validated by this adapter','screenshots':str(out)},indent=2))

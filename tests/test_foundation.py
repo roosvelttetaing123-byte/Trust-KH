@@ -54,8 +54,19 @@ def test_no_vendor_script_on_home(client):
 
 def test_headline_and_project_link(client):
     text=client.get("/").text
-    assert "Check before you trust" in text
+    assert 'lang="km"' in text  # Khmer is the base language; en/zh are applied by i18n.js.
+    assert "ពិនិត្យមុននឹងជឿ" in text
     assert 'href="/project/"' in text
+
+def test_three_languages_offered(client):
+    text=client.get("/").text
+    for value in ('value="km"','value="en"','value="zh"'):
+        assert value in text
+
+def test_fonts_are_self_hosted(client):
+    """Strict CSP allows font-src 'self' only, so the Khmer webfont must be local."""
+    assert "fonts.googleapis.com" not in client.get("/style.css").text
+    assert client.get("/fonts/kantumruy-pro-khmer.woff2").status_code==200
 
 def test_openapi_version(client):
     assert client.get("/api/openapi.json").json()["info"]["version"]=="0.2.0"

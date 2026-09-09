@@ -29,7 +29,7 @@ Open `http://127.0.0.1:8000`. The launcher generates three unique secrets in `.e
 
 ## What works / what does not
 
-Working: passive message/link rules; QR-image decoding; browser redaction; optional minimized reports; relevance review; report withdrawal; summary export; reviewed associations; separated synthetic/non-synthetic graph nodes; aggregate small-cell suppression; responsive citizen UI and draft Khmer citizen copy.
+Working: passive message/link rules; QR-image decoding; browser redaction; optional minimized reports; relevance review; report withdrawal; summary export; reviewed associations; separated synthetic/non-synthetic graph nodes; aggregate small-cell suppression; responsive citizen UI in an institutional design language, with draft Khmer, English and Chinese copy (Khmer is the base language; all three drafts await native-speaker review).
 
 Not implemented: screenshot text extraction; live reputation feeds; bank ownership verification; complete KHQR compatibility; Telegram; official police submission; named-account MFA; tenant isolation; billing; scheduled approved publication snapshots. See `/api/capabilities` for the machine-readable implementation manifest.
 

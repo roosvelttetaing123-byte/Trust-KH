@@ -1,39 +1,235 @@
 <!doctype html>
-<html lang="en">
+<html lang="km">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#0b172a"><meta name="description" content="Trust.kh local prototype — explainable, privacy-conscious scam triage for Cambodia.">
+  <meta name="theme-color" content="#014F99">
+  <meta name="description" content="Trust.kh — ពិនិត្យសារ តំណ លេខទូរស័ព្ទ និង QR ដែលគួរឱ្យសង្ស័យ។ Explainable, privacy-conscious scam triage for Cambodia.">
   <link rel="manifest" href="/manifest.webmanifest"><link rel="icon" href="/icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/style.css"><title>Trust.kh · Check before you trust</title>
+  <link rel="stylesheet" href="/style.css"><title>Trust.kh · ពិនិត្យមុននឹងជឿ</title>
 </head>
 <body>
-<a class="skip" href="#main">Skip to content</a>
-<header class="topbar"><a class="brand" href="#check"><span class="brandmark">T<span>✓</span></span><span>trust<span class="brand-kh">.kh</span><small data-i18n="brandSub">Digital confidence, built in Cambodia</small></span></a>
-<nav aria-label="Main navigation"><button class="nav active" data-page="check" data-i18n="checkNav">Check</button><button class="nav" data-page="analyst" data-i18n="analystNav">Analyst</button><button class="nav" data-page="pulse" data-i18n="pulseNav">Trust Pulse</button></nav>
-<button id="language" class="language" aria-label="Switch language">ខ្មែរ</button></header>
-<div class="notice-strip"><span class="live-dot" aria-hidden="true"></span><strong data-i18n="prototype">LOCAL PROTOTYPE</strong><span data-i18n="prototypeNote">No live threat feeds. No government or bank affiliation.</span></div>
-<div id="offline" class="offline hidden" role="status" data-i18n="offline">Offline. The guide is available, but checks cannot run. No verdict is available.</div>
-<main id="main">
-<section id="page-check" class="page">
-<div class="hero-layout"><div class="hero"><div class="eyebrow" data-i18n="eyebrow">A MOMENT TO CHECK. A REASON TO PAUSE.</div><h1 data-i18n="headline">Before you click. <br>Before you pay.<br><span>Check before you trust.</span></h1><p data-i18n="heroCopy">A suspicious message, link, phone number or payment QR? Understand the warning signs — and decide what to do next.</p><div class="promise-row"><span data-i18n="promise1">◎ No account required</span><span data-i18n="promise2">◈ You control reporting</span><span data-i18n="promise3">↗ Reasons, not guarantees</span></div></div><aside class="hero-card" aria-label="Product principle"><div class="eyebrow">A CLEARER NEXT STEP</div><div class="hero-card-mark" aria-hidden="true">?</div><h2>Less uncertainty.<br>More informed decisions.</h2><p>A reason to pause. Evidence to review.<br>Not a promise that something is safe.</p><div class="hero-card-bottom"><span>CHECK</span><span>UNDERSTAND</span><span>DECIDE</span></div></aside></div>
-<div class="workbench">
-<article class="panel input-panel"><div class="panel-top"><div><div class="eyebrow" data-i18n="stepOne">01 / YOUR CHECK</div><h2 data-i18n="inputTitle">What feels suspicious?</h2></div><span class="private-badge" data-i18n="privateBadge">Private by default</span></div>
-<div class="tabs" role="group" aria-label="Input type"><button class="tab active" data-kind="message" data-i18n="message">Message</button><button class="tab" data-kind="url" data-i18n="link">Link</button><button class="tab" data-kind="phone" data-i18n="phone">Phone</button><button class="tab" data-kind="qr" data-i18n="qr">QR text</button></div>
-<label class="field-label" for="check-text" data-i18n="inputLabel">Paste the content you want to check</label><textarea id="check-text" rows="6" maxlength="6000" autocomplete="off" spellcheck="false" placeholder="Paste a message or link here. Remove passwords, OTPs, account balances and personal details first."></textarea>
-<p class="field-note" data-i18n="inputPrivacy">The starter does not save the original message. Only a separate, opt-in report saves minimized indicators. Do not submit secrets.</p>
-<div class="input-actions"><button class="button primary" id="run-check" data-i18n="runCheck">Check warning signs <span>↗</span></button><button class="button quiet" id="clear-check" data-i18n="clear">Clear</button></div>
-<div class="examples"><span data-i18n="tryExample">TRY A SYNTHETIC EXAMPLE</span><button data-example="otp">OTP request</button><button data-example="unknown">Unknown link</button><button data-example="advice">Safety advice</button></div>
-<details class="image-tools"><summary data-i18n="imageTitle">Add an image / decode a QR</summary><p class="field-note" data-i18n="imageNote">Image preview and black-box redaction happen on your device. Screenshot text extraction is not built yet: type the relevant words above. QR decoding works after you explicitly send the redacted image to this local server.</p><label for="image-file" class="field-label" data-i18n="chooseImage">Choose PNG/JPEG (up to 2 MiB / 6 megapixels)</label><input type="file" id="image-file" accept="image/png,image/jpeg"><div id="canvas-wrap" class="hidden"><p class="field-note" data-i18n="redactInstruction">Drag over personal information to cover it. Redaction is applied to this copy only.</p><canvas id="image-canvas" aria-label="Image redaction canvas"></canvas><div class="button-row"><button id="decode-qr" class="button secondary" data-i18n="decodeQr">Send redacted image & decode QR</button><button id="save-image" class="button quiet" data-i18n="saveImage">Save redacted copy</button></div></div></details>
-</article>
-<article class="panel result-panel" aria-live="polite" aria-atomic="false"><div class="panel-top"><div><div class="eyebrow" data-i18n="stepTwo">02 / UNDERSTAND THE SIGNALS</div><h2 data-i18n="resultTitle">Clarity before action.</h2></div><span class="result-symbol">◇</span></div><div id="result-empty"><div class="empty-emblem">✓<span>?</span></div><h3 data-i18n="emptyTitle">A check is a pause, not a promise.</h3><p data-i18n="emptyCopy">Your result will explain what was found, what was not checked, and how to verify independently.</p><div class="explain-row"><span>01</span><div><strong data-i18n="explain1Title">Inspect without opening</strong><p data-i18n="explain1Copy">Submitted websites are never visited by this starter.</p></div></div><div class="explain-row"><span>02</span><div><strong data-i18n="explain2Title">See the reasons</strong><p data-i18n="explain2Copy">Deterministic rules. Clearly labelled synthetic examples.</p></div></div><div class="explain-row"><span>03</span><div><strong data-i18n="explain3Title">Stay in control</strong><p data-i18n="explain3Copy">Export a review summary or choose to submit a private report.</p></div></div></div><div id="result-content" class="hidden"></div></article>
+<a class="skip" href="#main" data-i18n="skip">រំលងទៅមាតិកា</a>
+
+<div class="gov-strip">
+  <div class="wrap">
+    <span><span class="dot" aria-hidden="true"></span><strong data-i18n="govTitle">ថ្នាលសាកល្បងឯករាជ្យសម្រាប់សុវត្ថិភាពឌីជីថល</strong></span>
+    <span data-i18n="govNote">មិនមែនជាសេវាកម្មរបស់រដ្ឋាភិបាល ធនាគារ ឬអាជ្ញាធរណាមួយឡើយ។</span>
+  </div>
 </div>
-<div class="principles"><div><span>◎</span><h3 data-i18n="principle1Title">Unknown does not mean safe.</h3><p data-i18n="principle1Copy">No result here certifies a person, website or payment.</p></div><div><span>◇</span><h3 data-i18n="principle2Title">Your story is not a public blacklist.</h3><p data-i18n="principle2Copy">Reports require consent and review. Raw conversations stay out of the dashboard.</p></div><div><span>↗</span><h3 data-i18n="principle3Title">A bridge, not the authorities.</h3><p data-i18n="principle3Copy">A Trust.kh report is not an official police complaint.</p></div></div>
-<details class="withdraw panel"><summary data-i18n="withdrawTitle">Withdraw an existing report</summary><p class="field-note" data-i18n="withdrawCopy">Use the private receipt saved when you submitted. Deletion removes the report and its graph observations from this local database; a minimal audit event remains.</p><label for="receipt-file" class="field-label" data-i18n="receiptLabel">Choose your Trust.kh receipt JSON</label><input type="file" id="receipt-file" accept="application/json,.json"><button id="withdraw-report" class="button secondary" data-i18n="withdrawButton">Withdraw report</button></details>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="#check">
+      <span class="brandmark" aria-hidden="true">T<span>✓</span></span>
+      <span class="brand-text">
+        <span class="brand-name">trust<em>.kh</em></span>
+        <small data-i18n="brandSub">ទំនុកចិត្តឌីជីថល សម្រាប់កម្ពុជា</small>
+      </span>
+    </a>
+    <nav data-i18n-label="navLabel" aria-label="ការរុករកមេ">
+      <button class="nav active" data-page="check" data-i18n="checkNav">ពិនិត្យ</button>
+      <button class="nav" data-page="analyst" data-i18n="analystNav">អ្នកវិភាគ</button>
+      <button class="nav" data-page="pulse" data-i18n="pulseNav">ទិន្នន័យសង្ខេប</button>
+    </nav>
+    <div class="lang-select">
+      <span class="globe" aria-hidden="true">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18M12 3c-2.5 2.7-2.5 15.3 0 18"/>
+        </svg>
+      </span>
+      <select id="language" data-i18n-label="langLabel" aria-label="ប្តូរភាសា">
+        <option value="km">ខ្មែរ</option>
+        <option value="en">English</option>
+        <option value="zh">中文</option>
+      </select>
+      <span class="caret" aria-hidden="true">▼</span>
+    </div>
+  </div>
+</header>
+
+<div class="notice-strip">
+  <div class="wrap">
+    <strong data-i18n="prototype">គំរូសាកល្បង</strong>
+    <span data-i18n="prototypeNote">មិនមានទិន្នន័យគំរាមកំហែងផ្ទាល់។ លទ្ធផលមកពីច្បាប់មូលដ្ឋានប៉ុណ្ណោះ។</span>
+  </div>
+</div>
+<div id="offline" class="offline hidden" role="status" data-i18n="offline">គ្មានអ៊ីនធឺណិត។ អាចអានការណែនាំបាន ប៉ុន្តែមិនអាចពិនិត្យបានទេ។</div>
+
+<main id="main">
+
+<section id="page-check" class="page">
+  <div class="hero-layout">
+    <div class="hero-inner">
+      <div class="hero">
+        <div class="eyebrow" data-i18n="eyebrow">ពិនិត្យបន្តិច មុននឹងសម្រេចចិត្ត</div>
+        <h1 data-i18n="headline">មុននឹងចុច។<br>មុននឹងបង់ប្រាក់។<br><span>ពិនិត្យមុននឹងជឿ។</span></h1>
+        <p data-i18n="heroCopy">ទទួលបានសារ តំណ លេខទូរស័ព្ទ ឬ QR ដែលគួរឱ្យសង្ស័យ? ស្វែងយល់ពីសញ្ញាព្រមាន និងអ្វីដែលគួរធ្វើបន្ទាប់។</p>
+        <div class="promise-row">
+          <span data-i18n="promise1">មិនចាំបាច់បង្កើតគណនី</span>
+          <span data-i18n="promise2">អ្នកសម្រេចថាត្រូវរាយការណ៍ឬអត់</span>
+          <span data-i18n="promise3">បង្ហាញមូលហេតុ មិនធានាសុវត្ថិភាព</span>
+        </div>
+      </div>
+      <aside class="hero-card" data-i18n-label="heroCardLabel" aria-label="គោលការណ៍ផលិតផល">
+        <div class="eyebrow" data-i18n="heroCardEyebrow">ជំហានបន្ទាប់ដ៏ច្បាស់លាស់</div>
+        <div class="hero-card-mark" aria-hidden="true">?</div>
+        <h2 data-i18n="heroCardTitle">កាត់បន្ថយភាពមិនច្បាស់។<br>សម្រេចចិត្តដោយមានព័ត៌មាន។</h2>
+        <p data-i18n="heroCardCopy">ជាហេតុផលឱ្យឈប់គិត។ ជាភស្តុតាងសម្រាប់ត្រួតពិនិត្យ។<br>មិនមែនជាការធានាថាមានសុវត្ថិភាពទេ។</p>
+        <div class="hero-card-bottom">
+          <span data-i18n="stepCheck">ពិនិត្យ</span>
+          <span data-i18n="stepUnderstand">យល់ដឹង</span>
+          <span data-i18n="stepDecide">សម្រេចចិត្ត</span>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <div class="workbench">
+    <article class="panel input-panel">
+      <div class="panel-top">
+        <div>
+          <div class="eyebrow" data-i18n="stepOne">០១ / ការពិនិត្យរបស់អ្នក</div>
+          <h2 data-i18n="inputTitle">តើអ្វីធ្វើឱ្យអ្នកសង្ស័យ?</h2>
+        </div>
+        <span class="private-badge" data-i18n="privateBadge">រក្សាភាពឯកជន</span>
+      </div>
+      <div class="tabs" role="group" data-i18n-label="inputTypeLabel" aria-label="ប្រភេទព័ត៌មាន">
+        <button class="tab active" data-kind="message" data-i18n="message">សារ</button>
+        <button class="tab" data-kind="url" data-i18n="link">តំណ</button>
+        <button class="tab" data-kind="phone" data-i18n="phone">ទូរស័ព្ទ</button>
+        <button class="tab" data-kind="qr" data-i18n="qr">អត្ថបទ QR</button>
+      </div>
+      <label class="field-label" for="check-text" data-i18n="inputLabel">បិទភ្ជាប់ព័ត៌មានដែលអ្នកចង់ពិនិត្យ</label>
+      <textarea id="check-text" rows="6" maxlength="6000" autocomplete="off" spellcheck="false"></textarea>
+      <p class="field-note" data-i18n="inputPrivacy">គំរូនេះមិនរក្សាទុកសារដើមទេ។ មានតែការរាយការណ៍ដោយមានការយល់ព្រមប៉ុណ្ណោះ ដែលរក្សាទុកព័ត៌មានចាំបាច់។ កុំបញ្ចូលលេខសម្ងាត់។</p>
+      <div class="input-actions">
+        <button class="button primary" id="run-check" data-i18n="runCheck">ពិនិត្យសញ្ញាព្រមាន</button>
+        <button class="button quiet" id="clear-check" data-i18n="clear">សម្អាត</button>
+      </div>
+      <div class="examples">
+        <span data-i18n="tryExample">សាកល្បងជាមួយទិន្នន័យគំរូ</span>
+        <button data-example="otp" data-i18n="exOtp">សំណើ OTP</button>
+        <button data-example="unknown" data-i18n="exUnknown">តំណមិនស្គាល់</button>
+        <button data-example="advice" data-i18n="exAdvice">ការណែនាំសុវត្ថិភាព</button>
+      </div>
+      <details class="image-tools">
+        <summary data-i18n="imageTitle">បន្ថែមរូបភាព / អាន QR</summary>
+        <p class="field-note" data-i18n="imageNote">រូបភាពត្រូវបានបង្ហាញ និងលាក់ព័ត៌មាននៅលើឧបករណ៍របស់អ្នក។ មុខងារអានអត្ថបទពីរូបភាពមិនទាន់មានទេ។ សូមវាយអត្ថបទខាងលើ។</p>
+        <label for="image-file" class="field-label" data-i18n="chooseImage">ជ្រើសរូប PNG/JPEG (មិនលើស 2 MiB / 6 មេហ្គាភីកសែល)</label>
+        <input type="file" id="image-file" accept="image/png,image/jpeg">
+        <div id="canvas-wrap" class="hidden">
+          <p class="field-note" data-i18n="redactInstruction">អូសលើព័ត៌មានផ្ទាល់ខ្លួនដើម្បីបិទបាំង។ រូបដើមមិនត្រូវបានផ្លាស់ប្តូរទេ។</p>
+          <canvas id="image-canvas" data-i18n-label="canvasLabel" aria-label="ផ្ទាំងបិទបាំងរូបភាព"></canvas>
+          <div class="button-row">
+            <button id="decode-qr" class="button secondary" data-i18n="decodeQr">ផ្ញើរូបដែលបានបិទបាំង និងអាន QR</button>
+            <button id="save-image" class="button quiet" data-i18n="saveImage">រក្សាទុកច្បាប់ចម្លង</button>
+          </div>
+        </div>
+      </details>
+    </article>
+
+    <article class="panel result-panel" aria-live="polite" aria-atomic="false">
+      <div class="panel-top">
+        <div>
+          <div class="eyebrow" data-i18n="stepTwo">០២ / ស្វែងយល់ពីសញ្ញាព្រមាន</div>
+          <h2 data-i18n="resultTitle">យល់ច្បាស់ មុននឹងធ្វើសកម្មភាព។</h2>
+        </div>
+        <span class="result-symbol" aria-hidden="true">◇</span>
+      </div>
+      <div id="result-empty">
+        <div class="empty-emblem" aria-hidden="true">✓<span>?</span></div>
+        <h3 data-i18n="emptyTitle">ការពិនិត្យមិនមែនជាការធានាទេ។</h3>
+        <p data-i18n="emptyCopy">លទ្ធផលនឹងបង្ហាញអ្វីដែលបានរកឃើញ អ្វីដែលមិនបានពិនិត្យ និងរបៀបផ្ទៀងផ្ទាត់ដោយខ្លួនឯង។</p>
+        <div class="explain-row"><span>01</span><div><strong data-i18n="explain1Title">ពិនិត្យដោយមិនបើកតំណ</strong><p data-i18n="explain1Copy">គំរូនេះមិនចូលទៅកាន់គេហទំព័រដែលអ្នកផ្ញើទេ។</p></div></div>
+        <div class="explain-row"><span>02</span><div><strong data-i18n="explain2Title">មើលមូលហេតុ</strong><p data-i18n="explain2Copy">ប្រើច្បាប់ដែលអាចពន្យល់បាន។ ទិន្នន័យសាកល្បងត្រូវបានសម្គាល់ច្បាស់។</p></div></div>
+        <div class="explain-row"><span>03</span><div><strong data-i18n="explain3Title">អ្នកជាអ្នកសម្រេច</strong><p data-i18n="explain3Copy">ទាញយកសេចក្ដីសង្ខេប ឬជ្រើសរើសរាយការណ៍ដោយឯកជន។</p></div></div>
+      </div>
+      <div id="result-content" class="hidden"></div>
+    </article>
+  </div>
+
+  <div class="principles">
+    <div class="principles-inner">
+      <div><span aria-hidden="true">◎</span><h3 data-i18n="principle1Title">មិនទាន់ដឹង មិនមែនមានន័យថាសុវត្ថិភាពទេ។</h3><p data-i18n="principle1Copy">លទ្ធផលនេះមិនបញ្ជាក់សុវត្ថិភាពរបស់បុគ្គល គេហទំព័រ ឬការបង់ប្រាក់ទេ។</p></div>
+      <div><span aria-hidden="true">◇</span><h3 data-i18n="principle2Title">រឿងរបស់អ្នកមិនមែនជាបញ្ជីខ្មៅសាធារណៈទេ។</h3><p data-i18n="principle2Copy">ការរាយការណ៍ត្រូវការការយល់ព្រម និងការត្រួតពិនិត្យ។ សារឯកជនមិនត្រូវបង្ហាញក្នុងផ្ទាំងទិន្នន័យទេ។</p></div>
+      <div><span aria-hidden="true">↗</span><h3 data-i18n="principle3Title">ជាស្ពាន មិនមែនជាអាជ្ញាធរ។</h3><p data-i18n="principle3Copy">ការរាយការណ៍នៅ Trust.kh មិនមែនជាការដាក់ពាក្យបណ្ដឹងផ្លូវការទេ។</p></div>
+    </div>
+  </div>
+
+  <details class="withdraw panel">
+    <summary data-i18n="withdrawTitle">ដករបាយការណ៍ដែលបានផ្ញើ</summary>
+    <p class="field-note" data-i18n="withdrawCopy">ប្រើបង្កាន់ដៃឯកជនដែលបានរក្សាទុក។ ការលុបនឹងដករបាយការណ៍ និងទំនាក់ទំនងទិន្នន័យចេញ ប៉ុន្តែកំណត់ហេតុសវនកម្មតិចតួចនៅសល់។</p>
+    <label for="receipt-file" class="field-label" data-i18n="receiptLabel">ជ្រើសឯកសារបង្កាន់ដៃ Trust.kh JSON</label>
+    <input type="file" id="receipt-file" accept="application/json,.json">
+    <div class="button-row"><button id="withdraw-report" class="button secondary" data-i18n="withdrawButton">ដករបាយការណ៍</button></div>
+  </details>
 </section>
-<section id="page-analyst" class="page hidden"><div class="section-hero"><div class="eyebrow">TRUST DESK / RESTRICTED WORKSPACE</div><h1>From reports<br>to <span>reviewed evidence.</span></h1><p>Review relevance, not guilt. Accepted reports create private co-occurrence links — not a public list of scammers.</p></div><div class="panel access-panel"><label for="analyst-key">Local analyst access key</label><div class="access-row"><input id="analyst-key" type="password" autocomplete="off" placeholder="TRUST_ADMIN_KEY from your local .env"><button id="load-analyst" class="button primary">Open workspace</button><button class="button quiet" id="lock-analyst">Lock</button></div><p class="field-note">Local development key only. Production requires named accounts, MFA, tenant isolation and audit controls.</p></div><div id="analyst-content" class="hidden"><div class="dashboard-grid"><article class="panel"><div class="eyebrow">HUMAN REVIEW</div><h2>Report inbox</h2><div id="report-list"></div></article><article class="panel"><div class="eyebrow">INDICATOR ASSOCIATIONS</div><h2>Evidence connections</h2><p class="field-note">Only reviewed reports. A shared indicator does not establish common ownership or criminal activity.</p><div id="graph"></div></article></div></div></section>
-<section id="page-pulse" class="page hidden"><div class="section-hero"><div class="eyebrow">TRUST PULSE / AGGREGATE VIEW</div><h1>See the patterns.<br><span>Not private conversations.</span></h1><p>A deliberately limited policy view. Submitted reports are not a representative measure of Cambodia's population or scam prevalence.</p></div><div class="panel access-panel"><label for="pulse-key">Local aggregate-view access key</label><div class="access-row"><input id="pulse-key" type="password" autocomplete="off" placeholder="TRUST_PULSE_KEY from your local .env"><button id="load-pulse" class="button primary">Load aggregates</button><button class="button quiet" id="lock-pulse">Lock</button></div><label class="checkbox"><input type="checkbox" id="pulse-demo"> Show synthetic demo dataset, never mixed with real reports</label></div><div id="pulse-content"></div></section>
+
+<section id="page-analyst" class="page hidden">
+  <div class="section-hero">
+    <div class="eyebrow" data-i18n="analystEyebrow">TRUST DESK / កន្លែងធ្វើការមានកំណត់សិទ្ធិ</div>
+    <h1 data-i18n="analystTitle">ពីរបាយការណ៍<br>ទៅជា <span>ភស្តុតាងដែលបានត្រួតពិនិត្យ។</span></h1>
+    <p data-i18n="analystCopy">ត្រួតពិនិត្យភាពពាក់ព័ន្ធ មិនមែនកំណត់កំហុសទេ។ របាយការណ៍ដែលទទួលយកបង្កើតតំណភ្ជាប់ឯកជន មិនមែនជាបញ្ជីសាធារណៈទេ។</p>
+  </div>
+  <div class="panel access-panel">
+    <label for="analyst-key" data-i18n="analystKeyLabel">សោចូលប្រើសម្រាប់អ្នកវិភាគ (មូលដ្ឋាន)</label>
+    <div class="access-row">
+      <input id="analyst-key" type="password" autocomplete="off">
+      <button id="load-analyst" class="button primary" data-i18n="openWorkspace">បើកកន្លែងធ្វើការ</button>
+      <button class="button quiet" id="lock-analyst" data-i18n="lock">ចាក់សោ</button>
+    </div>
+    <p class="field-note" data-i18n="analystKeyNote">សោសម្រាប់ការអភិវឌ្ឍមូលដ្ឋានប៉ុណ្ណោះ។ ផលិតកម្មត្រូវការគណនីមានឈ្មោះ MFA ការបែងចែកអង្គភាព និងកំណត់ហេតុសវនកម្ម។</p>
+  </div>
+  <div id="analyst-content" class="hidden">
+    <div class="dashboard-grid">
+      <article class="panel">
+        <div class="eyebrow" data-i18n="humanReview">ការត្រួតពិនិត្យដោយមនុស្ស</div>
+        <h2 data-i18n="reportInbox">ប្រអប់របាយការណ៍</h2>
+        <div id="report-list"></div>
+      </article>
+      <article class="panel">
+        <div class="eyebrow" data-i18n="assocEyebrow">ទំនាក់ទំនងសូចនាករ</div>
+        <h2 data-i18n="assocTitle">តំណភ្ជាប់ភស្តុតាង</h2>
+        <p class="field-note" data-i18n="assocNote">មានតែរបាយការណ៍ដែលបានត្រួតពិនិត្យ។ សូចនាកររួមមិនបញ្ជាក់ម្ចាស់រួម ឬសកម្មភាពឧក្រិដ្ឋទេ។</p>
+        <div id="graph"></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="page-pulse" class="page hidden">
+  <div class="section-hero">
+    <div class="eyebrow" data-i18n="pulseEyebrow">TRUST PULSE / ទិដ្ឋភាពសរុប</div>
+    <h1 data-i18n="pulseTitle">មើលឃើញនិន្នាការ។<br><span>មិនមែនសារឯកជនទេ។</span></h1>
+    <p data-i18n="pulseCopy">ទិដ្ឋភាពគោលនយោបាយដែលមានកំណត់ដោយចេតនា។ របាយការណ៍ដែលបានផ្ញើមិនតំណាងឱ្យប្រជាជនកម្ពុជាទាំងមូលទេ។</p>
+  </div>
+  <div class="panel access-panel">
+    <label for="pulse-key" data-i18n="pulseKeyLabel">សោចូលប្រើទិន្នន័យសរុប (មូលដ្ឋាន)</label>
+    <div class="access-row">
+      <input id="pulse-key" type="password" autocomplete="off">
+      <button id="load-pulse" class="button primary" data-i18n="loadAggregates">ផ្ទុកទិន្នន័យសរុប</button>
+      <button class="button quiet" id="lock-pulse" data-i18n="lock">ចាក់សោ</button>
+    </div>
+    <label class="checkbox"><input type="checkbox" id="pulse-demo"><span data-i18n="pulseDemoLabel">បង្ហាញទិន្នន័យសាកល្បង ដែលមិនលាយជាមួយរបាយការណ៍ពិត</span></label>
+  </div>
+  <div id="pulse-content"></div>
+</section>
+
 </main>
-<footer><a class="studio-link" href="/project/">Project studio ↗</a><a class="footer-brand" href="#check">trust.kh</a><p data-i18n="footer">Built in Cambodia. Built for trust. Prototype branding only; domain ownership and government endorsement are not claimed.</p><a href="/api/openapi.json" target="_blank" rel="noopener">API contract ↗</a></footer>
+
+<footer>
+  <div class="footer-inner">
+    <div>
+      <a class="footer-brand" href="#check">trust.kh</a>
+      <p data-i18n="footer">បង្កើតនៅកម្ពុជា ដើម្បីទំនុកចិត្ត។ នេះជាម៉ាកសាកល្បង មិនអះអាងកម្មសិទ្ធិឈ្មោះដែន ការទទួលស្គាល់ ឬការគាំទ្រពីរដ្ឋាភិបាលទេ។</p>
+    </div>
+    <div class="footer-links">
+      <a class="studio-link" href="/project/" data-i18n="projectStudio">កន្លែងគម្រោង ↗</a>
+      <a href="/api/openapi.json" target="_blank" rel="noopener" data-i18n="apiContract">កិច្ចសន្យា API ↗</a>
+      <a href="https://hotline.police.gov.kh/" target="_blank" rel="noopener noreferrer" data-i18n="policePortal">ការរាយការណ៍ផ្លូវការរបស់នគរបាល ↗</a>
+    </div>
+  </div>
+</footer>
 <div id="toast" class="toast hidden" role="status"></div>
 <script type="module" src="/app.js"></script>
 </body></html>

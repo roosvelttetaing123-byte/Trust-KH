@@ -17,6 +17,8 @@ with sync_playwright() as p:
     page.on('pageerror',lambda error:failures.append(str(error)))
     page.goto('http://127.0.0.1:8000/',wait_until='networkidle')
     page.screenshot(path=str(out/'desktop-home.png'),full_page=True)
+    assert page.locator('html').get_attribute('lang')=='km', 'Khmer is the base language'
+    page.select_option('#language','en')  # English assertions below need the English dictionary.
     page.click('[data-example="unknown"]');page.click('#run-check')
     page.get_by_text('Unknown — not verified',exact=True).wait_for()
     page.click('[data-example="otp"]');page.click('#run-check')
@@ -42,10 +44,15 @@ with sync_playwright() as p:
     page.get_by_text('Signals, with boundaries.',exact=True).wait_for()
     page.click('#lock-pulse')
     page.click('[data-page="check"]')
-    page.click('#language')
+    page.select_option('#language','km')
     assert page.locator('html').get_attribute('lang')=='km'
+    page.get_by_text('មានសញ្ញាព្រមានខ្លាំង',exact=True).wait_for()
     page.screenshot(path=str(out/'khmer-result.png'),full_page=True)
-    page.click('#language')
+    page.select_option('#language','zh')
+    assert page.locator('html').get_attribute('lang')=='zh'
+    page.get_by_text('存在明显警示信号',exact=True).wait_for()
+    page.screenshot(path=str(out/'chinese-result.png'),full_page=True)
+    page.select_option('#language','en')
     page.set_viewport_size({'width':390,'height':844})
     page.screenshot(path=str(out/'mobile-result.png'),full_page=True)
     assert page.evaluate('document.documentElement.scrollWidth <= window.innerWidth')
