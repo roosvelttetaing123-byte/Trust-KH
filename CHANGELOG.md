@@ -8,10 +8,19 @@
 - Bumped the service-worker cache to `v4`. Without it, returning visitors keep the previous icon, stylesheet and manifest — the same stale-shell trap hit earlier in development.
 - Corrected `manifest.webmanifest`, whose `theme_color`/`background_color` were still the pre-redesign `#0b172a`/`#f4f7f7` and disagreed with the page's own `theme-color` meta tag.
 
-**Open question, deliberately not resolved in code:** the mark places a national monument
-inside a security shield with a verification check, under the country's TLD, for a product
-that must not imply state endorsement. The towers are isolated as `#tk-towers` in
-`icon.svg` so they can be removed without touching the rest of the mark.
+### Resolved: removed the Angkor towers and moved off the verify.gov.kh palette
+Research into Cambodian law and the competition context changed this decision.
+
+- **Removed the Angkor towers from the mark.** Cambodia's Law on Marks (Art. 4) bars marks that imitate or contain a State emblem as an element, and Angkor Wat appears on the national flag. A monument inside a security shield, under a verification check, is a materially different claim from ordinary commercial use of Angkor imagery.
+- **Replaced the interface blue.** The palette was previously copied from `verify.gov.kh`, which is **MPTC's own flagship verification platform** (ASEAN Digital Awards 2024; UN Public Service Award June 2026) — and MPTC runs the CDA 2026 competition this project is entered in. Resembling a ministry's award-winning service while submitting to that ministry's competition reads as borrowing its credibility. The blue now comes from the Trust.kh mark: `#1B63C4`, 5.79:1 on white (AA).
+- Kantumruy Pro is kept. It is the standard Khmer typeface, not a government-exclusive asset.
+- The disclaimer strip stays. Cambodia's Penal Code (Arts. 635/636/639, aggravated by 642) addresses conduct that misleads the public into believing it carries public authority, and the Consumer Protection Law 2019 reaches misleading conduct "whether intentional or not" — a confusion-based test that a disclaimer mitigates but does not neutralise.
+
+The orange accent is used **only** in the wordmark, where WCAG's logotype exemption applies;
+it measures 2.59:1 on white and must not be reused for body text, links or controls.
+
+Not legal advice: the sources are English translations, the scope of MoC Announcement
+No. 1064 could not be verified, and a Cambodian lawyer should confirm before submission.
 
 ## Unreleased — Project studio on GitHub Pages
 - Added `.github/workflows/pages.yml`, publishing the static project studio from `app/static/project/` so there is no duplicated copy to drift out of date.

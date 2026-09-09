@@ -1,7 +1,14 @@
 /* Trust.kh — institutional design system.
-   Palette and typography follow Cambodian government service conventions
-   (verify.gov.kh / NDGCVP). Fonts are self-hosted so the strict CSP in
-   app/main.py stays unchanged and the interface works without a CDN. */
+
+   The register is institutional, but the palette is deliberately Trust.kh's own and
+   NOT verify.gov.kh's. That platform is MPTC's flagship service, and MPTC runs the
+   competition this project is entered in; matching its colours would have read as
+   borrowing a ministry's credibility rather than earning our own. The blue here comes
+   from the Trust.kh mark instead.
+
+   Kantumruy Pro is kept: it is the standard Khmer typeface, not a government-exclusive
+   asset. Fonts are self-hosted so the strict CSP in app/main.py stays unchanged and the
+   interface works without a CDN. */
 
 @font-face{font-family:'Kantumruy Pro';font-style:normal;font-weight:400 700;font-display:swap;
   src:url('/fonts/kantumruy-pro-khmer.woff2') format('woff2');
@@ -14,15 +21,16 @@
   unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 
 :root{
-  --blue:#014F99;
+  /* Trust.kh blue, taken from the mark. 5.8:1 on white — passes AA for body text. */
+  --blue:#1B63C4;
   /* Brand accent from the Trust.kh mark. Deliberately reserved for the wordmark and
      small highlights: making it a call-to-action colour would pull the interface away
      from the institutional register the rest of the palette is holding. */
   --brand-accent:#F58220;
-  --blue-dark:#003B73;
-  --blue-mid:#025EAB;
-  --blue-tint:#F2F8FC;
-  --blue-line:#D6E6F3;
+  --blue-dark:#14509E;
+  --blue-mid:#2E86DE;
+  --blue-tint:#F1F7FD;
+  --blue-line:#D4E4F7;
   --ink:#1B2733;
   --body:#333333;
   --muted:#5B6B7A;
