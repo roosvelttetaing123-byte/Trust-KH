@@ -15,12 +15,14 @@ from fastapi import FastAPI, Request, HTTPException, Header
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
+from .accounts import Directory, LOCKOUT_SECONDS
 from .config import Settings
 from .capabilities import BUILD_VERSION, manifest
 from .engine import analyze, public_result
 from .qr import decode_image, MAX_IMAGE_BYTES
-from .schemas import ScanRequest, ReportRequest, ReviewRequest
-from .storage import Store
+from .schemas import (ScanRequest, ReportRequest, ReviewRequest, LoginRequest,
+                      MfaRequest, StaffStatusRequest)
+from .storage import Store, DEFAULT_ORG_ID
 
 class BodyLimit:
     """Cap untrusted bytes before the framework buffers a request body."""
@@ -97,10 +99,11 @@ def bearer(value):
 def create_app(settings: Settings | None = None):
     settings=settings or Settings.from_env()
     store=Store(settings.database,settings.report_ttl_days)
+    directory=Directory(store)
     scans=TransientScans(settings.scan_ttl_seconds,settings.max_scans)
     limiter=Limiter(settings.rate_limit)
     app=FastAPI(title='Trust.kh local prototype',version=BUILD_VERSION,docs_url=None,redoc_url=None,openapi_url='/api/openapi.json')
-    app.state.store,app.state.scans=store,scans
+    app.state.store,app.state.scans,app.state.directory=store,scans,directory
     app.add_middleware(BodyLimit)
 
     @app.middleware('http')
@@ -127,10 +130,48 @@ def create_app(settings: Settings | None = None):
         # Do not echo untrusted inputs / secrets in validation errors or logs.
         return JSONResponse({'detail':'Invalid request fields, consent, or input length.'},status_code=422)
 
-    def authorized(value,expected):
-        token=bearer(value)
-        if not token or not secrets.compare_digest(token,expected):
-            raise HTTPException(401,'A valid role-specific access key is required.')
+    def require(authorization, capability):
+        """Every protected route resolves a named principal, then checks one capability."""
+        principal=directory.principal(bearer(authorization))
+        if principal is None:
+            raise HTTPException(401,'Sign in with a named staff account.')
+        if not principal.mfa_satisfied:
+            raise HTTPException(403,'Complete the second factor before continuing.')
+        if not principal.can(capability):
+            raise HTTPException(403,'Your role does not include this action.')
+        return principal
+
+    @app.post('/api/auth/login')
+    def login(request:LoginRequest):
+        result=directory.authenticate(request.email,request.password)
+        if 'session' in result:
+            return result
+        if result.get('error')=='locked':
+            raise HTTPException(429,'Too many failed attempts. This account is temporarily locked.',
+                                headers={'Retry-After':str(result.get('retry_after',LOCKOUT_SECONDS))})
+        # Identical response for unknown email and wrong password.
+        raise HTTPException(401,'Email or password is incorrect.')
+
+    @app.post('/api/auth/mfa')
+    def submit_mfa(request:MfaRequest,authorization:str|None=Header(default=None)):
+        if not directory.submit_mfa(bearer(authorization),request.code):
+            raise HTTPException(401,'That code is not valid. Check your authenticator app.')
+        principal=directory.principal(bearer(authorization))
+        return {'authenticated':True,'role':principal.role,'organization':principal.org_id,
+                'display_name':principal.display_name}
+
+    @app.get('/api/auth/me')
+    def whoami(authorization:str|None=Header(default=None)):
+        principal=directory.principal(bearer(authorization))
+        if principal is None:
+            raise HTTPException(401,'No active session.')
+        return {'email':principal.email,'display_name':principal.display_name,'role':principal.role,
+                'organization':principal.org_id,'mfa_satisfied':principal.mfa_satisfied}
+
+    @app.post('/api/auth/logout',status_code=204)
+    def logout(authorization:str|None=Header(default=None)):
+        directory.end_session(bearer(authorization))
+        return Response(status_code=204)
 
     @app.get('/api/capabilities')
     def capabilities():
@@ -173,7 +214,10 @@ def create_app(settings: Settings | None = None):
     @app.post('/api/reports',status_code=201)
     def report(request:ReportRequest,authorization:str|None=Header(default=None)):
         result=scans.get(request.scan_id,bearer(authorization))
-        try: return store.report(result,request.model_dump())
+        # Citizens are anonymous, so consented reports land in the pilot organization's
+        # intake queue. Routing to a chosen organization needs the partner agreements
+        # in docs/BUILD_BACKLOG.md B06, not a field a caller can set.
+        try: return store.report(result,request.model_dump(),DEFAULT_ORG_ID)
         except ValueError as exc: raise HTTPException(409,str(exc)) from exc
 
     @app.delete('/api/reports/{id_}',status_code=204)
@@ -201,29 +245,54 @@ def create_app(settings: Settings | None = None):
 
     @app.get('/api/analyst/reports')
     def report_list(authorization:str|None=Header(default=None)):
-        authorized(authorization,settings.admin_key)
-        return {'reports':store.reports(),'notice':'Local analyst workspace. Accepted = reviewed for relevance, NOT a confirmed criminal allegation.'}
+        principal=require(authorization,'reports.read')
+        return {'reports':store.reports(principal.org_id),'organization':principal.org_id,
+                'notice':'Reports belonging to your organization only. Accepted = reviewed for relevance, NOT a confirmed criminal allegation.'}
 
     @app.patch('/api/analyst/reports/{id_}')
     def review(id_:str,request:ReviewRequest,authorization:str|None=Header(default=None)):
-        authorized(authorization,settings.admin_key)
-        if not store.review(id_,request.status,request.reason): raise HTTPException(404,'Report not found.')
-        return {'status':request.status,'notice':'This does not add an indicator to a blocklist or change the risk engine.'}
+        principal=require(authorization,'reports.review')
+        # A report owned by another organization is reported as absent, not forbidden,
+        # so the response cannot be used to probe for report identifiers.
+        if not store.review(id_,request.status,request.reason,principal.org_id,principal):
+            raise HTTPException(404,'Report not found.')
+        return {'status':request.status,'reviewed_by':principal.email,
+                'notice':'This does not add an indicator to a blocklist or change the risk engine.'}
 
     @app.get('/api/analyst/graph')
     def graph(authorization:str|None=Header(default=None)):
-        authorized(authorization,settings.admin_key)
-        return store.graph()
+        principal=require(authorization,'graph.read')
+        return store.graph(principal.org_id)
+
+    @app.get('/api/analyst/audit')
+    def audit(authorization:str|None=Header(default=None)):
+        principal=require(authorization,'reports.read')
+        return {'events':store.audit_trail(principal.org_id),
+                'notice':'Audit history for your organization. Retained separately from report data.'}
+
+    @app.get('/api/analyst/staff')
+    def staff_list(authorization:str|None=Header(default=None)):
+        principal=require(authorization,'staff.manage')
+        return {'staff':directory.staff_list(principal.org_id),'organization':principal.org_id}
+
+    @app.patch('/api/analyst/staff/{id_}')
+    def staff_status(id_:str,request:StaffStatusRequest,authorization:str|None=Header(default=None)):
+        principal=require(authorization,'staff.manage')
+        if id_==principal.staff_id:
+            raise HTTPException(409,'You cannot disable your own account.')
+        if not directory.set_disabled(id_,principal.org_id,request.disabled,principal):
+            raise HTTPException(404,'Staff account not found in your organization.')
+        return {'staff_id':id_,'disabled':request.disabled}
 
     @app.get('/api/pulse')
     def pulse(authorization:str|None=Header(default=None)):
-        authorized(authorization,settings.pulse_key)
-        return store.pulse(settings.minimum_cohort)
+        principal=require(authorization,'pulse.read')
+        return store.pulse(settings.minimum_cohort,principal.org_id)
 
     @app.get('/api/pulse/demo')
     def pulse_demo(authorization:str|None=Header(default=None)):
-        authorized(authorization,settings.pulse_key)
-        return store.pulse(settings.minimum_cohort,True)
+        principal=require(authorization,'pulse.read')
+        return store.pulse(settings.minimum_cohort,principal.org_id,True)
 
     static=Path(__file__).parent/'static'
     app.mount('/',StaticFiles(directory=static,html=True),name='web')

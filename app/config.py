@@ -8,8 +8,6 @@ ROOT = Path(__file__).resolve().parents[1]
 @dataclass(frozen=True)
 class Settings:
     database: str
-    admin_key: str
-    pulse_key: str
     hmac_key: str
     scan_ttl_seconds: int = 900
     report_ttl_days: int = 30
@@ -29,8 +27,9 @@ class Settings:
         env = os.getenv('TRUST_ENV', 'local')
         if env not in {'local', 'test'}:
             raise RuntimeError('This starter only supports local/test. Complete docs/RELEASE_GATES.md before creating a production configuration.')
-        names = ['TRUST_ADMIN_KEY', 'TRUST_PULSE_KEY', 'TRUST_HMAC_KEY']
-        vals = [os.getenv(n, '') for n in names]
-        if any(len(v) < 32 for v in vals) or len(set(vals)) != 3:
-            raise RuntimeError('Generate three distinct secrets: python scripts/init_local.py')
-        return cls(os.getenv('TRUST_DB', str(ROOT / 'data' / 'trust.db')), *vals)
+        # Staff access is authenticated per named account (app/accounts.py), so the only
+        # remaining server secret is the indicator-fingerprinting key.
+        hmac_key = os.getenv('TRUST_HMAC_KEY', '')
+        if len(hmac_key) < 32:
+            raise RuntimeError('Generate the local secret and first admin: python scripts/init_local.py')
+        return cls(os.getenv('TRUST_DB', str(ROOT / 'data' / 'trust.db')), hmac_key)

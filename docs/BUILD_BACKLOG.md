@@ -17,8 +17,15 @@ Planned capacity: approximately 18–22 focused founder hours/week; adjust after
 | B09 / P0 | 28 Oct–1 Nov | Application review and submission buffer | owner approves final factual claims and submits |
 | B10 / later | after gates | Telegram / embed / subscriptions / institutional hosting | documented demand and authorized integration |
 
-## Next work item: B01
-Break into (a) data map and organization model, (b) migrations on isolated test PostgreSQL, (c) named staff session contract and MFA selection, (d) per-route and per-job authorization tests, (e) backup/restore rehearsal. Keep the existing SQLite adapter only for local demos. Choose the identity provider only after deployment and data decisions. Do not fake production MFA with a password field.
+## B01 status
+- (a) data map and organization model — **done**; organizations, staff, sessions and report ownership in `app/storage.py`.
+- (b) migrations on isolated test PostgreSQL — **not done**. No deployment target or pilot partner is settled, and no PostgreSQL or container runtime was available to test a migration honestly. The schema is kept portable; the swap is deferred to B01b, not claimed.
+- (c) named staff session contract and MFA selection — **done** as a standard-library scrypt + RFC 6238 TOTP implementation, chosen so the pilot does not commit to an identity vendor before (b). Not a production identity provider: no password reset or recovery.
+- (d) per-route and per-job authorization tests — **done**; role capability denial, password-only denial, and cross-organization denial for reports, reviews, graph, pulse, audit and staff management.
+- (e) backup/restore rehearsal — **done**; `scripts/backup_restore_drill.py` verifies integrity, compares row counts and serves live queries from the restored copy.
+
+## Next work item: B01b + B00
+Settle the pilot data scope and deployment target, then port the schema to PostgreSQL with migrations and re-run the tenant-denial and restore checks against it. Pick the identity provider in the same decision so password reset and recovery are solved once. B00's five staff and ten citizen interviews remain outstanding and are not replaced by this engineering work.
 
 ## Scope-cut order
 Cut Telegram, geographic maps, native apps, fancy graph drawing and autonomous AI agents before consent, honest unknown states, evidence correction, access control, Khmer comprehension tests or evaluation. Below 12 founder hours/week, restrict the competition scope to user-corrected message/link intake and one organization.

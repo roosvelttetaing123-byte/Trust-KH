@@ -166,7 +166,7 @@ html[lang="km"] .hero h1{font-size:clamp(1.6rem,3.4vw,2.3rem);line-height:1.5}
 .tab.active{background:var(--white);color:var(--blue);box-shadow:var(--shadow)}
 
 .field-label{display:block;font-size:13px;font-weight:600;color:var(--ink);margin-bottom:.4rem}
-textarea,input[type=text],input[type=password],select:not(.lang-select select){
+textarea,input[type=text],input[type=email],input[type=password],select:not(.lang-select select){
   width:100%;font:inherit;font-size:15px;color:var(--body);background:var(--white);
   border:1px solid var(--line);border-radius:var(--radius);padding:.7rem .85rem;
 }
@@ -271,6 +271,11 @@ html[lang="km"] .result-section-title,html[lang="zh"] .result-section-title{lett
 .access-panel label{display:block;font-size:13px;font-weight:600;color:var(--ink);margin-bottom:.4rem}
 .access-row{display:flex;gap:.6rem;flex-wrap:wrap}
 .access-row input{flex:1 1 260px}
+/* Auth panel layout lives here, not in style attributes: style-src 'self' blocks those. */
+.auth-field{flex:1 1 220px}
+.access-row.signed-in{align-items:center;justify-content:space-between}
+.access-row.signed-in .field-note{margin-top:.2rem}
+#mfa-analyst,#mfa-pulse{flex:0 1 160px;letter-spacing:.3em;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;text-align:center}
 .dashboard-grid{max-width:var(--wrap);margin:1.5rem auto 0;padding:0 1.5rem;display:grid;
   grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:1.5rem;align-items:start}
 .access-panel,.withdraw.panel{margin-left:auto;margin-right:auto;width:calc(100% - 3rem)}

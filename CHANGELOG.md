@@ -1,5 +1,23 @@
 # Changelog
 
+## Unreleased — B01: named staff identity, tenant isolation and audit
+- Replaced the two shared static access keys with **named staff accounts**: scrypt password hashing, a TOTP second factor verified against the RFC 6238 vectors, server-side sessions stored as digests, per-account lockout, and sign-out revocation.
+- A password alone now grants no capability. The session exists but is unauthorized until the second factor succeeds, so `/api/analyst/*` answers 403 rather than 200.
+- Added an **organization model**. Reports, associations, aggregates, audit history and staff management are all scoped to the caller's organization; a cross-organization review returns 404 rather than acting, and cannot be used to probe for report identifiers.
+- Added **role capabilities** — `analyst`, `pulse`, `admin` — enforced per route, so authentication and authorization are separate boundaries.
+- Added an **actor-attributed audit trail** (`/api/analyst/audit`) recording sign-ins, failed sign-ins, MFA outcomes, reviews and account changes against a named account, visible in Trust Desk.
+- Added a **backup and restore rehearsal** (`scripts/backup_restore_drill.py`): consistent online backup, integrity check, row-count comparison, and live queries served from the restored copy.
+- Retention now also expires stale sessions, and audit history is kept for a year independently of report expiry.
+- Provisioning moved to `scripts/init_local.py` (first admin) and `scripts/create_staff.py` (further accounts and organizations). There is no public registration route.
+- Fixed a resource leak: `with sqlite3.connect(...)` ends the transaction but never closes the handle, which leaked file descriptors on every query and locked the database file on Windows. `Store.connect()` is now a context manager that commits *and* closes.
+- Fixed schema initialisation ordering so an index can no longer be created against a column that `CREATE TABLE IF NOT EXISTS` skipped adding to an existing database.
+
+**Not done in this slice:** the PostgreSQL migration (B01b). There is no deployment
+target or pilot partner yet, and no PostgreSQL or container runtime was available to
+test a migration honestly, so the SQL is kept portable and the swap is recorded as
+outstanding rather than claimed. Password reset, an external identity provider and
+production key management also remain outstanding.
+
 ## Unreleased — Institutional interface and trilingual copy
 - Rebuilt the citizen, analyst and aggregate interfaces in the design language used by Cambodian government digital services (Kantumruy Pro, `#014F99` institutional blue, restrained cards and a formal footer), taking the palette and typeface from the NDGCVP platform at verify.gov.kh.
 - Khmer is now the base language of the served HTML, so the primary audience gets Khmer with no JavaScript and no repaint.

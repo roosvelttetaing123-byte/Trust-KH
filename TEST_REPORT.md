@@ -2,7 +2,27 @@
 
 Observed 9 September 2026. This records development checks, not production readiness or a security certification.
 
-## Executed on the owner's Windows machine (9 September 2026)
+## B01 identity slice — executed on the owner's Windows machine (9 September 2026)
+
+- **74 pytest tests passed** (53 previous plus 21 covering identity, authorization, tenant isolation, audit and recovery).
+- TOTP verified against the **RFC 6238 appendix B vectors**, plus drift tolerance, stale-code rejection and malformed input.
+- Password-only sessions were confirmed to receive **403, not 200**, on analyst routes: authentication and authorization are separate boundaries.
+- Cross-organization review returned **404 and left the foreign report `pending`** — verified by re-reading it from the store, not just by the status code.
+- Lockout confirmed to hold against the *correct* password once triggered; unknown-email and wrong-password responses are byte-identical.
+- Session tokens and passwords confirmed absent from a full `iterdump()` of the database.
+- Backup/restore drill run against the live database: integrity check passed, row counts matched, and reports, graph and pulse queries were served from the restored copy.
+- Signed in end to end in a real browser as the seeded admin: password → second factor → Trust Desk, with the audit panel showing `auth.password_ok`, `auth.mfa_ok` and `staff.created` attributed to `admin@trust.local`.
+- Schema migration exercised on the pre-existing local database (columns added in place, no data loss).
+
+### Defects found and fixed during this slice
+- `with sqlite3.connect(...)` ends the transaction but does not close the handle. Every query leaked a file descriptor and held a Windows file lock; the backup drill failed on temp-directory cleanup, which is what exposed it. `Store.connect()` is now a context manager that commits and closes.
+- Schema initialisation created an index on `reports(org_id)` before the migration added that column to an existing database.
+- Inline `style` attributes in the JavaScript-rendered sign-in panel were blocked by `style-src 'self'` — moved into the stylesheet. The policy caught this, which is itself evidence the CSP is enforced.
+
+### Not established by the B01 checks
+No independent security review of the identity code. No PostgreSQL, password reset, account recovery, external identity provider, managed secret storage, or concurrency/load testing. Lockout is per account and in-process rate limiting is per IP; neither is distributed. The audit trail is append-only by convention, not by storage guarantee — a database administrator can still alter it.
+
+## Interface redesign — executed on the owner's Windows machine (9 September 2026)
 
 First run outside the authoring environment, so this supersedes the "Windows
 execution remains outstanding" limitation recorded below.

@@ -1,10 +1,12 @@
 import io
 import json
 import sqlite3
+from contextlib import closing
 import time
 import zipfile
 import qrcode
 from PIL import Image
+from app.storage import DEFAULT_ORG_ID
 
 
 def scan(client,text='Please send your OTP now. Visit https://reward-check.test with @helpdesk_demo.'):
@@ -53,7 +55,7 @@ def test_report_minimization_and_dedup(client,settings):
     response=report(client,s)
     assert response.status_code==201
     assert report(client,s).status_code==409
-    with sqlite3.connect(settings.database) as c:
+    with closing(sqlite3.connect(settings.database)) as c, c:
         dump='\n'.join(c.iterdump())
     for value in ['998877','private-secret','token=abc','012345678','Please send your OTP']:
         assert value not in dump
@@ -63,46 +65,53 @@ def test_delete_report_cascades_observations(client,settings):
     r=report(client,scan(client)).json()
     assert client.delete('/api/reports/'+r['report_id'],headers=auth('wrong')).status_code==404
     assert client.delete('/api/reports/'+r['report_id'],headers=auth(r['deletion_token'])).status_code==204
-    with sqlite3.connect(settings.database) as c:
+    with closing(sqlite3.connect(settings.database)) as c, c:
         assert c.execute('SELECT COUNT(*) FROM observations').fetchone()[0]==0
         assert c.execute('SELECT COUNT(*) FROM reports').fetchone()[0]==0
 
-def test_analyst_and_pulse_roles_separated(client,settings):
+def test_analyst_and_pulse_roles_separated(client,auth_header):
     assert client.get('/api/analyst/reports').status_code==401
     assert client.get('/api/pulse').status_code==401
-    assert client.get('/api/analyst/reports',headers=auth(settings.pulse_key)).status_code==401
-    assert client.get('/api/pulse',headers=auth(settings.admin_key)).status_code==401
-    assert client.get('/api/pulse',headers=auth(settings.pulse_key)).status_code==200
+    analyst=auth_header(email='a@pilot.test',role='analyst')
+    viewer=auth_header(email='p@pilot.test',role='pulse')
+    # A role boundary, not just an authentication boundary.
+    assert client.get('/api/analyst/reports',headers=viewer).status_code==403
+    assert client.get('/api/pulse',headers=analyst).status_code==403
+    assert client.get('/api/analyst/reports',headers=analyst).status_code==200
+    assert client.get('/api/pulse',headers=viewer).status_code==200
 
-def test_pending_reports_do_not_change_risk_or_graph(client,settings):
+def test_pending_reports_do_not_change_risk_or_graph(client,auth_header):
+    header=auth_header(role='admin')
     for _ in range(4):
         s=scan(client,'See https://unfamiliar.test with @helpdesk_demo.')
         report(client,s)
-    g=client.get('/api/analyst/graph',headers=auth(settings.admin_key)).json()
+    g=client.get('/api/analyst/graph',headers=header).json()
     assert not g['nodes']
     assert scan(client,'See https://unfamiliar.test')['verdict']=='unknown'
 
-def test_review_adds_associations_not_blocklist(client,settings):
+def test_review_adds_associations_not_blocklist(client,auth_header):
+    header=auth_header(role='admin')
     s=scan(client,'Visit https://ordinary.test and contact @helpdesk_demo.')
     r=report(client,s).json()
-    response=client.patch('/api/analyst/reports/'+r['report_id'],headers=auth(settings.admin_key),json={'status':'accepted','reason':'relevant_evidence'})
+    response=client.patch('/api/analyst/reports/'+r['report_id'],headers=header,json={'status':'accepted','reason':'relevant_evidence'})
     assert response.status_code==200
-    g=client.get('/api/analyst/graph',headers=auth(settings.admin_key)).json()
+    g=client.get('/api/analyst/graph',headers=header).json()
     assert len(g['nodes'])==2 and len(g['edges'])==1
     assert 'indicator_key' not in json.dumps(g)
     assert scan(client,'Visit https://ordinary.test')['verdict']=='unknown'
 
-def test_pulse_small_cell_and_demo_separation(client,settings):
+def test_pulse_small_cell_and_demo_separation(client,auth_header):
+    header=auth_header(role='admin')
     for _ in range(5):
         r=report(client,scan(client)).json()
-        client.patch('/api/analyst/reports/'+r['report_id'],headers=auth(settings.admin_key),json={'status':'accepted','reason':'relevant_evidence'})
-    production=client.get('/api/pulse',headers=auth(settings.pulse_key)).json()
-    demo=client.get('/api/pulse/demo',headers=auth(settings.pulse_key)).json()
+        client.patch('/api/analyst/reports/'+r['report_id'],headers=header,json={'status':'accepted','reason':'relevant_evidence'})
+    production=client.get('/api/pulse',headers=header).json()
+    demo=client.get('/api/pulse/demo',headers=header).json()
     assert production['reviewed_reports']==0
     assert demo['reviewed_reports']==5
     r=report(client,scan(client),category='shopping').json()
-    client.patch('/api/analyst/reports/'+r['report_id'],headers=auth(settings.admin_key),json={'status':'accepted','reason':'relevant_evidence'})
-    demo=client.get('/api/pulse/demo',headers=auth(settings.pulse_key)).json()
+    client.patch('/api/analyst/reports/'+r['report_id'],headers=header,json={'status':'accepted','reason':'relevant_evidence'})
+    demo=client.get('/api/pulse/demo',headers=header).json()
     assert demo['reviewed_reports'] is None
     assert demo['small_cells_suppressed']
     assert len(demo['categories'])==1
@@ -149,10 +158,10 @@ def test_no_qr_and_invalid_image_have_clear_errors(client):
 
 def test_expired_reports_purged(client,settings,app):
     r=report(client,scan(client)).json()
-    with sqlite3.connect(settings.database) as c:
+    with closing(sqlite3.connect(settings.database)) as c, c:
         c.execute('UPDATE reports SET expires_at=0')
     app.state.store.purge()
-    assert not app.state.store.reports()
+    assert not app.state.store.reports(DEFAULT_ORG_ID)
 
 def test_openapi_is_available(client):
     document=client.get('/api/openapi.json').json()

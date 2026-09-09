@@ -1,13 +1,26 @@
 """Optional UI smoke test. Requires Playwright + a Chromium binary and a running local app.
 Use only the local starter; the script never visits submitted test URLs.
+
+Staff sign-in needs a real account. Provide one from the environment:
+  TRUST_SMOKE_EMAIL, TRUST_SMOKE_PASSWORD, TRUST_SMOKE_TOTP_SECRET
+Create it first with: python scripts/create_staff.py --email ... --role admin
 """
 import json
 from pathlib import Path
 import os
+import sys
 from playwright.sync_api import sync_playwright
 
 root=Path(__file__).resolve().parents[1]
-keys=dict(line.split('=',1) for line in (root/'.env').read_text().splitlines() if '=' in line)
+sys.path.insert(0,str(root))
+from app.identity import totp_now
+
+EMAIL=os.getenv('TRUST_SMOKE_EMAIL')
+PASSWORD=os.getenv('TRUST_SMOKE_PASSWORD')
+SECRET=os.getenv('TRUST_SMOKE_TOTP_SECRET')
+if not (EMAIL and PASSWORD and SECRET):
+    raise SystemExit('Set TRUST_SMOKE_EMAIL, TRUST_SMOKE_PASSWORD and TRUST_SMOKE_TOTP_SECRET '
+                     'for an admin account created with scripts/create_staff.py.')
 out=Path(os.getenv('TRUST_SCREENSHOTS',str(root/'artifacts')))
 out.mkdir(exist_ok=True,parents=True)
 with sync_playwright() as p:
@@ -31,18 +44,22 @@ with sync_playwright() as p:
     page.click('#submit-report')
     page.locator('#save-receipt').wait_for()
     page.click('[data-page="analyst"]')
-    page.fill('#analyst-key',keys['TRUST_ADMIN_KEY'])
-    page.click('#load-analyst')
+    page.fill('#email-analyst',EMAIL)
+    page.fill('#password-analyst',PASSWORD)
+    page.click('[data-signin="analyst"]')
+    page.locator('#mfa-analyst').wait_for()
+    assert not page.locator('#analyst-content').is_visible(), 'workspace shown before the second factor'
+    page.fill('#mfa-analyst',totp_now(SECRET))
+    page.click('[data-mfa="analyst"]')
     page.locator('[data-review="accepted"]').first.wait_for()
     page.locator('[data-review="accepted"]').first.click()
     page.locator('.graph-node').first.wait_for()
-    page.click('#lock-analyst')
-    assert not page.locator('#analyst-content').is_visible()
+    page.locator('#audit-log .edge').first.wait_for()
     page.click('[data-page="pulse"]')
-    page.fill('#pulse-key',keys['TRUST_PULSE_KEY'])
     page.click('#load-pulse')
     page.get_by_text('Signals, with boundaries.',exact=True).wait_for()
-    page.click('#lock-pulse')
+    page.click('[data-signout]')
+    assert not page.locator('#analyst-content').is_visible()
     page.click('[data-page="check"]')
     page.select_option('#language','km')
     assert page.locator('html').get_attribute('lang')=='km'

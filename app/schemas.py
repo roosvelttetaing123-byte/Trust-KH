@@ -24,3 +24,13 @@ class ReportRequest(StrictModel):
 class ReviewRequest(StrictModel):
     status: Literal['accepted','rejected']
     reason: Literal['relevant_evidence','insufficient_evidence','duplicate','out_of_scope']
+
+class LoginRequest(StrictModel):
+    email: str = Field(min_length=3, max_length=254)
+    password: str = Field(min_length=1, max_length=256)
+
+class MfaRequest(StrictModel):
+    code: str = Field(min_length=6, max_length=6)
+
+class StaffStatusRequest(StrictModel):
+    disabled: bool

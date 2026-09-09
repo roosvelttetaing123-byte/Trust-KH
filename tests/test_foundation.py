@@ -2,7 +2,7 @@
 import time
 import uuid
 from app.engine import analyze
-from app.storage import Store
+from app.storage import Store, DEFAULT_ORG_ID
 
 def test_manifest_truthful(client):
     response=client.get("/api/capabilities")
@@ -25,9 +25,9 @@ def test_demo_and_real_graph_never_merge(tmp_path):
     for demo in [True, False]:
         scan=analyze("url", "https://shared.example", "test-secret")
         scan["is_demo"]=demo  # Simulate records from both allowed datasets.
-        receipt=store.report(scan,{"scan_id":uuid.uuid4().hex,"consent_version":"2026-09-09.v1","category":"other","channel":"web"})
-        store.review(receipt["report_id"],"accepted","relevant_evidence")
-    nodes=store.graph()["nodes"]
+        receipt=store.report(scan,{"scan_id":uuid.uuid4().hex,"consent_version":"2026-09-09.v1","category":"other","channel":"web"},DEFAULT_ORG_ID)
+        store.review(receipt["report_id"],"accepted","relevant_evidence",DEFAULT_ORG_ID)
+    nodes=store.graph(DEFAULT_ORG_ID)["nodes"]
     assert len(nodes)==2
     assert {node["is_demo"] for node in nodes}=={True,False}
     assert all(node["reports"]==1 for node in nodes)
@@ -35,11 +35,11 @@ def test_demo_and_real_graph_never_merge(tmp_path):
 def test_expired_report_cannot_be_reviewed(tmp_path):
     store=Store(str(tmp_path / "expired.db"))
     receipt=store.report(analyze("url","https://example.com","test-secret"),
-        {"scan_id":uuid.uuid4().hex,"consent_version":"2026-09-09.v1","category":"other","channel":"web"})
+        {"scan_id":uuid.uuid4().hex,"consent_version":"2026-09-09.v1","category":"other","channel":"web"},DEFAULT_ORG_ID)
     with store.connect() as c:
         c.execute("UPDATE reports SET expires_at=?",(int(time.time())-10,))
-    assert not store.review(receipt["report_id"],"accepted","relevant_evidence")
-    assert store.graph()["nodes"]==[]
+    assert not store.review(receipt["report_id"],"accepted","relevant_evidence",DEFAULT_ORG_ID)
+    assert store.graph(DEFAULT_ORG_ID)["nodes"]==[]
 
 def test_project_studio_served(client):
     response=client.get("/project/")

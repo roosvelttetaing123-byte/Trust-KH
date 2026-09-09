@@ -23,15 +23,48 @@ python3 -m venv .venv
 .venv/bin/python scripts/dev.py
 ```
 
-Open `http://127.0.0.1:8000`. The launcher generates three unique secrets in `.env` only when it does not exist. Keep that file private. Use `TRUST_ADMIN_KEY` for the Analyst view and `TRUST_PULSE_KEY` for Pulse. These development keys are not production identity. Stop the server with Ctrl+C.
+Open `http://127.0.0.1:8000`. Stop the server with Ctrl+C.
+
+### Signing in to Trust Desk and Trust Pulse
+
+On first run the launcher creates `.env` and a **first admin account**, printing its
+email, password and MFA secret once. Keep them: they are not stored anywhere readable.
+
+Staff sign-in needs the password **and** a current 6-digit TOTP code. Add the printed
+`otpauth://` URI to any authenticator app, or print a code from the terminal:
+
+```bash
+python scripts/create_staff.py --totp-code YOUR_MFA_SECRET
+```
+
+Manage accounts and organizations with the same script:
+
+```bash
+python scripts/create_staff.py --list
+python scripts/create_staff.py --email analyst@example.org --role analyst
+python scripts/create_staff.py --create-org "Partner organization"
+```
+
+Roles are `analyst` (review reports), `pulse` (aggregates only) and `admin` (both, plus
+account management). Each account belongs to one organization and sees only that
+organization's reports, associations, aggregates and audit history. There is no public
+sign-up route, and there should not be one before the release gates are met.
+
+Rehearse recovery at any time with `python scripts/backup_restore_drill.py`.
 
 **Do not expose the prototype through a public tunnel or deploy it with real citizen evidence.** Public-launch requirements are in [release gates](docs/RELEASE_GATES.md). The project does not require paid services to run locally.
 
 ## What works / what does not
 
-Working: passive message/link rules; QR-image decoding; browser redaction; optional minimized reports; relevance review; report withdrawal; summary export; reviewed associations; separated synthetic/non-synthetic graph nodes; aggregate small-cell suppression; responsive citizen UI in an institutional design language, with draft Khmer, English and Chinese copy (Khmer is the base language; all three drafts await native-speaker review).
+Working: passive message/link rules; QR-image decoding; browser redaction; optional minimized reports; relevance review; report withdrawal; summary export; reviewed associations; separated synthetic/non-synthetic graph nodes; aggregate small-cell suppression; responsive citizen UI in an institutional design language, with draft Khmer, English and Chinese copy (Khmer is the base language; all three drafts await native-speaker review); named staff accounts with a TOTP second factor, role capabilities, per-organization isolation, an actor-attributed audit trail, and a verified backup/restore drill.
 
-Not implemented: screenshot text extraction; live reputation feeds; bank ownership verification; complete KHQR compatibility; Telegram; official police submission; named-account MFA; tenant isolation; billing; scheduled approved publication snapshots. See `/api/capabilities` for the machine-readable implementation manifest.
+Not implemented: screenshot text extraction; live reputation feeds; bank ownership verification; complete KHQR compatibility; Telegram; official police submission; PostgreSQL migration; an external identity provider; password reset and recovery; billing; scheduled approved publication snapshots. See `/api/capabilities` for the machine-readable implementation manifest.
+
+The identity layer is standard-library only and deliberately minimal. It exists so
+authorization can be designed and tested against named accounts instead of a shared
+key — it is not a reviewed production identity provider, and it has no password reset,
+no session revocation UI beyond sign-out, and no rate limiting beyond per-account
+lockout and the per-IP API limiter.
 
 Checks are not stored as raw conversations. Reports require a separate choice. User reports never directly change risk verdicts. Unknown does not mean safe. A graph connection is not criminal attribution.
 

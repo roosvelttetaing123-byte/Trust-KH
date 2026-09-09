@@ -15,9 +15,8 @@ function translate(){
  for(const [el,base] of original)el.innerHTML=t(el.dataset.i18n)??base; // Only trusted static dictionaries.
  for(const [el,base] of originalLabels)el.setAttribute('aria-label',t(el.dataset.i18nLabel)??base);
  $('#check-text').placeholder=t('checkPlaceholder')??'បិទភ្ជាប់សារ ឬតំណនៅទីនេះ។ សូមលុប OTP លេខសម្ងាត់ និងព័ត៌មានផ្ទាល់ខ្លួនជាមុន។';
- $('#analyst-key').placeholder=t('analystKeyPlaceholder')??'TRUST_ADMIN_KEY ពី .env មូលដ្ឋាន';
- $('#pulse-key').placeholder=t('pulseKeyPlaceholder')??'TRUST_PULSE_KEY ពី .env មូលដ្ឋាន';
  $('#language').value=lang;
+ renderAuth();
  if(last)renderResult();
 }
 $('#language').addEventListener('change',event=>{
@@ -89,19 +88,69 @@ canvas.addEventListener('pointercancel',()=>{start=null;});
 const canvasBlob=()=>new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(Error(msg().imageEncode)),'image/png'));
 $('#save-image').addEventListener('click',async()=>{try{saveBlob(await canvasBlob(),'trust-kh-redacted-copy.png');}catch(error){toast(error.message);}});
 $('#decode-qr').addEventListener('click',async()=>{const button=$('#decode-qr');button.disabled=true;try{const blob=await canvasBlob();if(blob.size>2*1024*1024)throw Error(msg().imageTooBig);const response=await api('/api/qr/decode',{method:'POST',body:blob,headers:{'Content-Type':'image/png'}});const result=await response.json();setKind('qr');$('#check-text').value=result.text;toast(msg().qrDecoded);}catch(error){toast(error.message);}finally{button.disabled=false;}});
+// The session token is deliberately kept in memory only: a reload signs the analyst
+// out rather than leaving evidence access recoverable from browser storage.
+let session=null,me=null;
+function renderAuth(){
+ const m=msg();
+ for(const panel of $$('[data-auth-panel]')){
+  const view=panel.dataset.authPanel;
+  if(!session){
+   panel.innerHTML=`<h2>${esc(m.signInTitle)}</h2><p class="field-note">${esc(m.signInNote)}</p>
+   <div class="report-fields"><div class="auth-field"><label class="field-label" for="email-${view}">${esc(m.emailLabel)}</label><input id="email-${view}" type="email" autocomplete="username"></div>
+   <div class="auth-field"><label class="field-label" for="password-${view}">${esc(m.passwordLabel)}</label><input id="password-${view}" type="password" autocomplete="current-password"></div></div>
+   <div class="button-row"><button class="button primary" data-signin="${view}">${esc(m.signIn)}</button></div>`;
+  }else if(!me?.mfa_satisfied){
+   panel.innerHTML=`<h2>${esc(m.mfaTitle)}</h2><p class="field-note">${esc(m.mfaNote)}</p>
+   <div class="access-row"><input id="mfa-${view}" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" aria-label="${esc(m.mfaLabel)}">
+   <button class="button primary" data-mfa="${view}">${esc(m.verify)}</button>
+   <button class="button quiet" data-signout="1">${esc(m.signOut)}</button></div>`;
+  }else{
+   panel.innerHTML=`<div class="access-row signed-in">
+   <div><strong>${esc(m.signedInAs)} ${esc(me.display_name)}</strong>
+   <p class="field-note">${esc(m.organizationLabel)}: ${esc(me.organization)} · ${esc(m.roleLabel)}: ${esc(me.role)} · ${esc(me.email)}</p></div>
+   <button class="button quiet" data-signout="1">${esc(m.signOut)}</button></div>`;
+  }
+ }
+ const analystOk=me?.mfa_satisfied&&(me.role==='analyst'||me.role==='admin');
+ const pulseOk=me?.mfa_satisfied&&(me.role==='pulse'||me.role==='admin');
+ $('#analyst-content').classList.toggle('hidden',!analystOk);
+ $('#pulse-controls').classList.toggle('hidden',!pulseOk);
+ if(!analystOk){$('#report-list').innerHTML='';$('#graph').innerHTML='';$('#audit-log').innerHTML='';}
+ if(!pulseOk)$('#pulse-content').innerHTML='';
+}
+document.addEventListener('click',async event=>{
+ const signin=event.target.closest('[data-signin]'),mfa=event.target.closest('[data-mfa]'),out=event.target.closest('[data-signout]');
+ if(signin){
+  const view=signin.dataset.signin,button=signin;button.disabled=true;
+  try{
+   const response=await api('/api/auth/login',{method:'POST',body:{email:$(`#email-${view}`).value.trim(),password:$(`#password-${view}`).value}});
+   session=(await response.json()).session;me={mfa_satisfied:false};renderAuth();
+   $(`#mfa-${view}`)?.focus();
+  }catch(error){toast(error.message);button.disabled=false;}
+ }else if(mfa){
+  const view=mfa.dataset.mfa;mfa.disabled=true;
+  try{
+   await api('/api/auth/mfa',{method:'POST',token:session,body:{code:$(`#mfa-${view}`).value.trim()}});
+   me=await (await api('/api/auth/me',{token:session})).json();renderAuth();
+   if(me.role==='analyst'||me.role==='admin')await loadAnalyst();
+  }catch(error){toast(error.message);mfa.disabled=false;}
+ }else if(out){
+  try{await api('/api/auth/logout',{method:'POST',token:session});}catch{}
+  session=null;me=null;renderAuth();toast(msg().signedOut);
+ }
+});
 async function loadAnalyst(){
- const token=$('#analyst-key').value.trim(),m=msg();
- try{const [a,b]=await Promise.all([api('/api/analyst/reports',{token}),api('/api/analyst/graph',{token})]);const {reports}=await a.json(),graph=await b.json();$('#analyst-content').classList.remove('hidden');
+ const token=session,m=msg();
+ try{const [a,b,c]=await Promise.all([api('/api/analyst/reports',{token}),api('/api/analyst/graph',{token}),api('/api/analyst/audit',{token})]);const {reports}=await a.json(),graph=await b.json(),{events}=await c.json();
+  $('#audit-log').innerHTML=events.length?events.map(e=>`<div class="edge"><strong>${esc(e.event)}</strong>${e.actor_email?' · '+esc(e.actor_email):''}<br>${esc(new Date(e.timestamp*1000).toLocaleString())}${e.reason?' · '+esc(e.reason):''}</div>`).join(''):`<p class="field-note">${esc(m.auditEmpty)}</p>`;
   $('#report-list').innerHTML=reports.length?reports.map(r=>`<div class="report-item"><h3>${esc(r.category)} <span class="status">${esc(r.status)}</span></h3><p>${r.is_demo?esc(m.syntheticData)+' · ':''}${esc(r.channel)} · ${esc(r.id.slice(0,8))}</p><div class="chip-row">${r.indicators.map(i=>`<span class="chip">${esc(i.display)}</span>`).join('')}</div><p>${esc(m.ruleFindings)}: ${esc(r.signal_codes.join(', ')||m.none)}. ${esc(m.noOriginal)}</p><div class="button-row"><button class="button secondary" data-review="accepted" data-id="${esc(r.id)}">${esc(m.accept)}</button><button class="button quiet" data-review="rejected" data-id="${esc(r.id)}">${esc(m.reject)}</button></div></div>`).join(''):`<p class="field-note">${esc(m.noReports)}</p>`;
-  $$('[data-review]').forEach(button=>button.addEventListener('click',async()=>{try{await api('/api/analyst/reports/'+encodeURIComponent(button.dataset.id),{method:'PATCH',token,body:{status:button.dataset.review,reason:button.dataset.review==='accepted'?'relevant_evidence':'insufficient_evidence'}});await loadAnalyst();}catch(error){toast(error.message);}}));
+  $$('[data-review]').forEach(button=>button.addEventListener('click',async()=>{try{await api('/api/analyst/reports/'+encodeURIComponent(button.dataset.id),{method:'PATCH',token:session,body:{status:button.dataset.review,reason:button.dataset.review==='accepted'?'relevant_evidence':'insufficient_evidence'}});await loadAnalyst();}catch(error){toast(error.message);}}));
   const nodeMap=Object.fromEntries(graph.nodes.map(n=>[n.id,n]));
   $('#graph').innerHTML=graph.nodes.length?`<div class="graph-nodes">${graph.nodes.map(n=>`<div class="graph-node"><strong>${esc(n.label)}</strong><small>${esc(n.kind)} · ${esc(n.reports)} ${esc(m.reviewedReports)} ${n.is_demo?'· DEMO':''}</small></div>`).join('')}</div>${graph.edges.map(e=>`<div class="edge">${esc(nodeMap[e.source].label)} ↔ ${esc(nodeMap[e.target].label)}<br>${esc(e.reports)} ${esc(m.coOccurrence)}</div>`).join('')}`:`<p class="field-note">${esc(m.noAssoc)}</p>`;
  }catch(error){toast(error.message);}
 }
-$('#load-analyst').addEventListener('click',loadAnalyst);
-$('#lock-analyst').addEventListener('click',()=>{$('#analyst-key').value='';$('#analyst-content').classList.add('hidden');$('#report-list').innerHTML='';$('#graph').innerHTML='';});
-$('#load-pulse').addEventListener('click',async()=>{const m=msg();try{const response=await api($('#pulse-demo').checked?'/api/pulse/demo':'/api/pulse',{token:$('#pulse-key').value.trim()});const data=await response.json();$('#pulse-content').innerHTML=`<article class="panel pulse-card"><div class="eyebrow">${esc(data.dataset==='synthetic_demo'?m.syntheticData:m.consentedData)}</div><h2>${esc(m.pulseTitle)}</h2><div class="metric">${data.reviewed_reports===null?esc(m.suppressed):esc(data.reviewed_reports)}</div><p class="field-note">${esc(m.pulseMetricNote)}</p>${data.categories.map(c=>`<div class="bar-row"><span>${esc(c.category)}</span><strong>${esc(c.reports)} ${esc(m.reports)}</strong></div>`).join('')||`<p class="field-note">${esc(m.noThreshold)}</p>`}<p class="field-note">${esc(m.minCell)}: ${esc(data.minimum_cell_size)}. ${data.small_cells_suppressed?esc(m.smallCells):''}</p><p class="field-note">${esc(data.notice)}</p></article>`;}catch(error){toast(error.message);}});
-$('#lock-pulse').addEventListener('click',()=>{$('#pulse-key').value='';$('#pulse-content').innerHTML='';});
+$('#load-pulse').addEventListener('click',async()=>{const m=msg();try{const response=await api($('#pulse-demo').checked?'/api/pulse/demo':'/api/pulse',{token:session});const data=await response.json();$('#pulse-content').innerHTML=`<article class="panel pulse-card"><div class="eyebrow">${esc(data.dataset==='synthetic_demo'?m.syntheticData:m.consentedData)}</div><h2>${esc(m.pulseTitle)}</h2><div class="metric">${data.reviewed_reports===null?esc(m.suppressed):esc(data.reviewed_reports)}</div><p class="field-note">${esc(m.pulseMetricNote)}</p>${data.categories.map(c=>`<div class="bar-row"><span>${esc(c.category)}</span><strong>${esc(c.reports)} ${esc(m.reports)}</strong></div>`).join('')||`<p class="field-note">${esc(m.noThreshold)}</p>`}<p class="field-note">${esc(m.minCell)}: ${esc(data.minimum_cell_size)}. ${data.small_cells_suppressed?esc(m.smallCells):''}</p><p class="field-note">${esc(data.notice)}</p></article>`;}catch(error){toast(error.message);}});
 function online(){ $('#offline').classList.toggle('hidden',navigator.onLine);$('#run-check').disabled=!navigator.onLine; }
 window.addEventListener('online',online);window.addEventListener('offline',online);
 if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});

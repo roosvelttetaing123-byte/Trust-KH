@@ -171,15 +171,7 @@
     <h1 data-i18n="analystTitle">ពីរបាយការណ៍<br>ទៅជា <span>ភស្តុតាងដែលបានត្រួតពិនិត្យ។</span></h1>
     <p data-i18n="analystCopy">ត្រួតពិនិត្យភាពពាក់ព័ន្ធ មិនមែនកំណត់កំហុសទេ។ របាយការណ៍ដែលទទួលយកបង្កើតតំណភ្ជាប់ឯកជន មិនមែនជាបញ្ជីសាធារណៈទេ។</p>
   </div>
-  <div class="panel access-panel">
-    <label for="analyst-key" data-i18n="analystKeyLabel">សោចូលប្រើសម្រាប់អ្នកវិភាគ (មូលដ្ឋាន)</label>
-    <div class="access-row">
-      <input id="analyst-key" type="password" autocomplete="off">
-      <button id="load-analyst" class="button primary" data-i18n="openWorkspace">បើកកន្លែងធ្វើការ</button>
-      <button class="button quiet" id="lock-analyst" data-i18n="lock">ចាក់សោ</button>
-    </div>
-    <p class="field-note" data-i18n="analystKeyNote">សោសម្រាប់ការអភិវឌ្ឍមូលដ្ឋានប៉ុណ្ណោះ។ ផលិតកម្មត្រូវការគណនីមានឈ្មោះ MFA ការបែងចែកអង្គភាព និងកំណត់ហេតុសវនកម្ម។</p>
-  </div>
+  <div class="panel access-panel" data-auth-panel="analyst"></div>
   <div id="analyst-content" class="hidden">
     <div class="dashboard-grid">
       <article class="panel">
@@ -194,6 +186,14 @@
         <div id="graph"></div>
       </article>
     </div>
+    <div class="dashboard-grid">
+      <article class="panel">
+        <div class="eyebrow" data-i18n="auditEyebrow">កំណត់ហេតុសវនកម្ម</div>
+        <h2 data-i18n="auditTitle">នរណាបានធ្វើអ្វី</h2>
+        <p class="field-note" data-i18n="auditNote">រាល់សកម្មភាពរបស់បុគ្គលិកត្រូវបានកត់ត្រា ដោយភ្ជាប់នឹងគណនីមានឈ្មោះ។</p>
+        <div id="audit-log"></div>
+      </article>
+    </div>
   </div>
 </section>
 
@@ -203,12 +203,10 @@
     <h1 data-i18n="pulseTitle">មើលឃើញនិន្នាការ។<br><span>មិនមែនសារឯកជនទេ។</span></h1>
     <p data-i18n="pulseCopy">ទិដ្ឋភាពគោលនយោបាយដែលមានកំណត់ដោយចេតនា។ របាយការណ៍ដែលបានផ្ញើមិនតំណាងឱ្យប្រជាជនកម្ពុជាទាំងមូលទេ។</p>
   </div>
-  <div class="panel access-panel">
-    <label for="pulse-key" data-i18n="pulseKeyLabel">សោចូលប្រើទិន្នន័យសរុប (មូលដ្ឋាន)</label>
+  <div class="panel access-panel" data-auth-panel="pulse"></div>
+  <div id="pulse-controls" class="panel access-panel hidden">
     <div class="access-row">
-      <input id="pulse-key" type="password" autocomplete="off">
       <button id="load-pulse" class="button primary" data-i18n="loadAggregates">ផ្ទុកទិន្នន័យសរុប</button>
-      <button class="button quiet" id="lock-pulse" data-i18n="lock">ចាក់សោ</button>
     </div>
     <label class="checkbox"><input type="checkbox" id="pulse-demo"><span data-i18n="pulseDemoLabel">បង្ហាញទិន្នន័យសាកល្បង ដែលមិនលាយជាមួយរបាយការណ៍ពិត</span></label>
   </div>
