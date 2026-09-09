@@ -1,0 +1,5 @@
+[
+ {"name":"Synthetic OTP lure","kind":"message","text":"Send your OTP at https://reward-check.test and contact @helpdesk_demo.","expected":"high_risk; synthetic fixture clearly labelled"},
+ {"name":"Unknown URL","kind":"url","text":"https://ordinary-shop.test/catalog","expected":"unknown; not safe"},
+ {"name":"Safety education","kind":"message","text":"Never share your OTP with anyone.","expected":"unknown; no warning rule matched, not a safety certificate"}
+]

@@ -1,0 +1,61 @@
+"""Foundation regressions: implementation claims and evidence lifecycle."""
+import time
+import uuid
+from app.engine import analyze
+from app.storage import Store
+
+def test_manifest_truthful(client):
+    response=client.get("/api/capabilities")
+    assert response.status_code==200
+    data=response.json()
+    assert data["version"]=="0.2.0"
+    assert data["production_ready"] is False
+    assert data["external_requests"] is False
+    assert "live_reputation" in data["not_implemented"]
+    assert not set(data["working"]) & set(data["not_implemented"])
+    assert response.headers["cache-control"]=="no-store"
+
+def test_manifest_has_no_keys(client):
+    text=client.get("/api/capabilities").text
+    assert "deletion_token" not in text
+    assert "TRUST_ADMIN_KEY" not in text
+
+def test_demo_and_real_graph_never_merge(tmp_path):
+    store=Store(str(tmp_path / "graph.db"))
+    for demo in [True, False]:
+        scan=analyze("url", "https://shared.example", "test-secret")
+        scan["is_demo"]=demo  # Simulate records from both allowed datasets.
+        receipt=store.report(scan,{"scan_id":uuid.uuid4().hex,"consent_version":"2026-09-09.v1","category":"other","channel":"web"})
+        store.review(receipt["report_id"],"accepted","relevant_evidence")
+    nodes=store.graph()["nodes"]
+    assert len(nodes)==2
+    assert {node["is_demo"] for node in nodes}=={True,False}
+    assert all(node["reports"]==1 for node in nodes)
+
+def test_expired_report_cannot_be_reviewed(tmp_path):
+    store=Store(str(tmp_path / "expired.db"))
+    receipt=store.report(analyze("url","https://example.com","test-secret"),
+        {"scan_id":uuid.uuid4().hex,"consent_version":"2026-09-09.v1","category":"other","channel":"web"})
+    with store.connect() as c:
+        c.execute("UPDATE reports SET expires_at=?",(int(time.time())-10,))
+    assert not store.review(receipt["report_id"],"accepted","relevant_evidence")
+    assert store.graph()["nodes"]==[]
+
+def test_project_studio_served(client):
+    response=client.get("/project/")
+    assert response.status_code==200
+    assert "Project studio" in response.text
+    assert "planned" in response.text.lower()
+
+def test_no_vendor_script_on_home(client):
+    text=client.get("/").text
+    assert '<script src="http' not in text
+    assert 'src="https://' not in text
+
+def test_headline_and_project_link(client):
+    text=client.get("/").text
+    assert "Check before you trust" in text
+    assert 'href="/project/"' in text
+
+def test_openapi_version(client):
+    assert client.get("/api/openapi.json").json()["info"]["version"]=="0.2.0"

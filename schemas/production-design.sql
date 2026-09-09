@@ -1,0 +1,29 @@
+-- DESIGN ONLY. Not a migration, not used by this starter, not production authorization.
+-- Add foreign keys, checks, encryption, RLS policies, migrations and tenant-isolation tests
+-- through the chosen ORM before deployment. This sketch only documents intended entities.
+
+-- tenant(id uuid, name text, service_tier text, retention_policy jsonb)
+-- membership(tenant_id uuid, subject_id text, role text, disabled_at timestamptz)
+-- consent_event(id uuid, purpose text, version text, accepted_at timestamptz, withdrawn_at timestamptz)
+-- case_report(id uuid, tenant_id uuid, consent_id uuid, status text, category text,
+--             channel text, created_at timestamptz, expires_at timestamptz, is_synthetic boolean)
+-- evidence(id uuid, case_id uuid, encrypted_object_key text, key_reference text,
+--          sha256 text, mime_type text, source_type text, user_confirmed boolean, expires_at timestamptz)
+-- indicator(id uuid, namespace text, keyed_fingerprint bytea, masked_display text,
+--           first_seen timestamptz, last_seen timestamptz, expires_at timestamptz)
+-- observation(case_id uuid, indicator_id uuid, extraction_method text,
+--             extraction_confidence numeric, user_confirmed boolean)
+-- assertion(id uuid, indicator_id uuid, source_id uuid, classification text,
+--           reliability text, valid_until timestamptz, reviewed_by text, provenance jsonb)
+-- relationship(id uuid, left_indicator_id uuid, right_indicator_id uuid,
+--              evidence_case_id uuid, relation_type text, review_state text, expires_at timestamptz)
+-- campaign(id uuid, analyst_label text, hypothesis_state text, reviewed_at timestamptz)
+-- case_audit(id uuid, case_id uuid, actor_id text, action text, reason text, timestamp timestamptz)
+-- publication_snapshot(id uuid, window_start date, window_end date,
+--                      disclosure_reviewed_by text, released_aggregates jsonb)
+-- webhook_delivery(id uuid, tenant_id uuid, event_id uuid, endpoint_id uuid,
+--                  attempts int, next_attempt_at timestamptz, status text)
+
+-- Policy intent: named tenant roles, deny-by-default, explicit case access;
+-- Pulse reader can SELECT approved publication_snapshot only, never raw case/evidence tables.
+-- HMAC fingerprints are pseudonymous sensitive data, not anonymous public IDs.
