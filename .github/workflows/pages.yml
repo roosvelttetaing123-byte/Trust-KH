@@ -42,7 +42,14 @@ jobs:
             echo "::error::The project studio must remain static; it now references a backend."
             exit 1
           fi
-          echo "Studio is self-contained."
+          # The studio needs its own copy of the mark, because the relative path must
+          # resolve both under the application at /project/ and at the Pages root.
+          # Two copies can drift, so fail rather than ship a stale logo.
+          if ! cmp -s app/static/icon.svg app/static/project/icon.svg; then
+            echo "::error::app/static/project/icon.svg differs from the source mark. Re-copy it."
+            exit 1
+          fi
+          echo "Studio is self-contained and its mark matches the source."
 
       - uses: actions/configure-pages@v5
 

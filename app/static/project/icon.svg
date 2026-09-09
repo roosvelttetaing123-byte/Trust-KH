@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Trust.kh">
+  <title>Trust.kh</title>
+  <defs>
+    <linearGradient id="tkShield" x1="10" y1="4" x2="54" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3B92E8"/>
+      <stop offset=".55" stop-color="#1B63C4"/>
+      <stop offset="1" stop-color="#2BB4C4"/>
+    </linearGradient>
+    <linearGradient id="tkInner" x1="20" y1="12" x2="46" y2="52" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7FD4F7"/>
+      <stop offset="1" stop-color="#1E74CE"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="32" cy="35" rx="28" ry="15.5" transform="rotate(-24 32 35)"
+           fill="none" stroke="#2E86DE" stroke-width="1.8" opacity=".75"/>
+  <path d="M32 4 57 12v20c0 13.6-10.9 24.2-25 28C17.9 56.2 7 45.6 7 32V12z" fill="url(#tkShield)"/>
+  <path d="M32 11.5 50 17v15c0 10.2-8.1 18.4-18 21.7C22.1 50.4 14 42.2 14 32V17z" fill="url(#tkInner)" opacity=".5"/>
+  <path d="M22.5 34.5 29.5 41.5 45 25.5" fill="none" stroke="#fff" stroke-width="6.4"
+        stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="52.5" cy="16.5" r="4.1" fill="#2E86DE"/>
+  <circle cx="11" cy="28" r="3.5" fill="#F58220"/>
+  <circle cx="41.5" cy="52.5" r="3.5" fill="#2BB8A6"/>
+</svg>
