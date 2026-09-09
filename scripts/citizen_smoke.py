@@ -21,7 +21,7 @@ ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
 import qrcode
 from fastapi.testclient import TestClient
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, expect
 from app.main import create_app
 from app.config import Settings
 
@@ -82,7 +82,7 @@ with tempfile.TemporaryDirectory() as tmp:
     page.add_script_tag(content=WRAP_FETCH);page.add_script_tag(content=js)
    else:
     page.add_init_script(WRAP_FETCH);page.goto(f'http://127.0.0.1:{port}',wait_until='networkidle')
-   page.wait_for_function("document.querySelector('#run-check').getAttribute('aria-busy')==='false'")
+   expect(page.locator('#run-check')).to_have_attribute('aria-busy','false')
    page.evaluate('document.fonts.ready');assert not page.locator('#result-panel').is_visible()
    page.screenshot(path=str(out/'home-km.png'),full_page=True)
    page.select_option('#language','en')
@@ -124,7 +124,7 @@ with tempfile.TemporaryDirectory() as tmp:
    buffer=io.BytesIO();qrcode.make('https://ordinary-shop.test/catalog').save(buffer,format='PNG')
    page.locator('#image-file').set_input_files({'name':'synthetic-qr.png','mimeType':'image/png','buffer':buffer.getvalue()})
    page.locator('#canvas-wrap:not(.hidden)').wait_for();page.locator('#decode-qr').click()
-   page.wait_for_function("document.querySelector('#check-qr').value.includes('ordinary-shop.test')")
+   expect(page.locator('#check-qr')).to_have_value('https://ordinary-shop.test/catalog')
    assert not page.locator('#qr-confirm').is_checked()
    page.locator('#run-check').click();assert page.locator('#check-error').is_visible()
    page.locator('#qr-confirm').check();page.locator('#run-check').click();page.locator('.verdict-label').wait_for()
@@ -146,7 +146,12 @@ with tempfile.TemporaryDirectory() as tmp:
    assert page.evaluate("getComputedStyle(document.querySelector('.working-mark'),'::before').animationName")=='none'
    if not args.adapter:
     assert 'frame-ancestors' in page.request.get(f'http://127.0.0.1:{port}/').headers['content-security-policy']
-    page.wait_for_function('navigator.serviceWorker.controller!==null')
+    # Poll via the debugging protocol, not a string predicate evaluated by the page.
+    # The application intentionally keeps script-src 'self' without unsafe-eval.
+    for _ in range(60):
+     if page.evaluate('() => navigator.serviceWorker.controller !== null'):break
+     page.wait_for_timeout(100)
+    else:raise AssertionError('Service worker did not take control')
     cached=page.evaluate('''async()=>{const all=[];for(const k of await caches.keys()){for(const r of await(await caches.open(k)).keys())all.push(new URL(r.url).pathname);}return all;}''')
     assert '/citizen.css' in cached and not any(path.startswith('/api/') for path in cached)
    assert not errors,errors
